@@ -15,7 +15,8 @@ namespace B2Lib.Utilities
 
         public List<B2BucketCache> GetState()
         {
-            return new List<B2BucketCache>(_cache.Select(s => s.CreateCopy()));
+            lock (_cache)
+                return new List<B2BucketCache>(_cache.Select(s => s.CreateCopy()));
         }
 
         public void LoadState(List<B2BucketCache> state)
