@@ -21,6 +21,7 @@ Todo
 -------
 
  - Handle changes to the API (B2 is still in Beta)
+ - Extend upload and download features (they're a bit messy now)
  - Extend the unit test coverage
 
 In General
