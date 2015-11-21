@@ -17,7 +17,6 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="bin\Release\B2Lib.dll" target="lib\net45\B2Lib.dll" />
         <file src="bin\Release\B2Lib.pdb" target="lib\net45\B2Lib.pdb" />
     </files>
 </package>
