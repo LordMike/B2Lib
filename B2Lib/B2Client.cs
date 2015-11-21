@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using B2Lib.Enums;
 using B2Lib.Exceptions;
@@ -272,7 +273,7 @@ namespace B2Lib
 
         public async Task<B2FileInfo> UploadFile(string bucketId, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
         {
-            B2BucketCache uploadConfig = await FetchUploadUrl(bucketId);
+            B2BucketCache uploadConfig = await Task.Run(() => FetchUploadUrl(bucketId));
 
             using (var fs = File.OpenRead(file.FullName))
             using (SHA1CryptoServiceProvider sha1 = new SHA1CryptoServiceProvider())
@@ -288,16 +289,30 @@ namespace B2Lib
             }
         }
 
-        private async Task<B2BucketCache> FetchUploadUrl(string bucketId)
+        private B2BucketCache FetchUploadUrl(string bucketId)
         {
-            B2BucketCache item = _bucketCache.GetById(bucketId);
+            object lockObj = KeyLocker.GetLockObject(bucketId);
 
-            if (item != null && item.ReadyForUpload)
-                return item;
+            lock (lockObj)
+            {
+                B2BucketCache item = _bucketCache.GetById(bucketId);
 
-            B2UploadConfiguration res = await B2Communicator.GetUploadUrl(_apiUrl, _authorizationToken, bucketId);
+                if (item != null && item.ReadyForUpload)
+                    return item;
 
-            return _bucketCache.RecordBucket(res);
+                B2UploadConfiguration res;
+                try
+                {
+                    res = B2Communicator.GetUploadUrl(_apiUrl, _authorizationToken, bucketId).Result;
+                }
+                catch (AggregateException ex)
+                {
+                    // Re-throw the inner exception
+                    throw ex.InnerException;
+                }
+
+                return _bucketCache.RecordBucket(res);
+            }
         }
 
         public async Task<B2FileDownloadResult> DownloadFileHead(B2FileBase file)

@@ -68,6 +68,7 @@
     <Compile Include="Objects\B2UploadConfiguration.cs" />
     <Compile Include="Utilities\EnumExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\KeyLocker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
