@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace B2Lib.Objects
 {
-    public class B2FileUploadResult
+    public class B2FileInfo
     {
         public string AccountId { get; set; }
         public string BucketId { get; set; }

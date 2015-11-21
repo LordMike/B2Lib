@@ -212,16 +212,16 @@ namespace B2Lib
             return res;
         }
 
-        public async Task<B2FileWithSize> GetFileInfo(B2FileBase file)
+        public async Task<B2FileInfo> GetFileInfo(B2FileBase file)
         {
             return await GetFileInfo(file.FileId);
         }
 
-        public async Task<B2FileWithSize> GetFileInfo(string fileId)
+        public async Task<B2FileInfo> GetFileInfo(string fileId)
         {
             ThrowExceptionIfNotAuthorized();
 
-            B2FileWithSize res = await B2Communicator.GetFileInfo(_apiUrl, _authorizationToken, fileId);
+            B2FileInfo res = await B2Communicator.GetFileInfo(_apiUrl, _authorizationToken, fileId);
 
             return res;
         }
@@ -260,12 +260,12 @@ namespace B2Lib
             return new B2FileVersionsIterator(_apiUrl, _authorizationToken, bucketId, startFileName, startFileId);
         }
 
-        public Task<B2FileUploadResult> UploadFile(B2Bucket bucket, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
+        public Task<B2FileInfo> UploadFile(B2Bucket bucket, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
         {
             return UploadFile(bucket.BucketId, file, fileName, fileInfo, contentType);
         }
 
-        public async Task<B2FileUploadResult> UploadFile(string bucketId, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
+        public async Task<B2FileInfo> UploadFile(string bucketId, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
         {
             B2BucketCache uploadConfig = await FetchUploadUrl(bucketId);
 
@@ -276,7 +276,7 @@ namespace B2Lib
 
                 fs.Seek(0, SeekOrigin.Begin);
 
-                B2FileUploadResult res = await B2Communicator.UploadFile(uploadConfig.UploadUri, uploadConfig.UploadAuthorizationToken, fs, fileName,
+                B2FileInfo res = await B2Communicator.UploadFile(uploadConfig.UploadUri, uploadConfig.UploadAuthorizationToken, fs, fileName,
                      hash, fileInfo, contentType);
 
                 return res;

@@ -32,7 +32,6 @@ namespace B2Lib
 
         private async static Task<HttpResponseMessage> InternalRequest(Uri apiUri, string authToken, string path, object body)
         {
-
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, new Uri(apiUri, path));
 
             msg.Headers.Authorization = new AuthenticationHeaderValue(authToken);
@@ -107,11 +106,11 @@ namespace B2Lib
             return resp.StatusCode == HttpStatusCode.OK;
         }
 
-        public static async Task<B2FileWithSize> GetFileInfo(Uri apiUri, string authToken, string fileId)
+        public static async Task<B2FileInfo> GetFileInfo(Uri apiUri, string authToken, string fileId)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, authToken, "/b2api/v1/b2_get_file_info", new { fileId });
 
-            return JsonConvert.DeserializeObject<B2FileWithSize>(await resp.Content.ReadAsStringAsync());
+            return JsonConvert.DeserializeObject<B2FileInfo>(await resp.Content.ReadAsStringAsync());
         }
 
         public static async Task<B2FileListContainer> ListFiles(Uri apiUri, string authToken, string bucketId, string startFileName = null, int maxFileCount = 100)
@@ -135,7 +134,7 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2UploadConfiguration>(await resp.Content.ReadAsStringAsync());
         }
 
-        public static async Task<B2FileUploadResult> UploadFile(Uri uploadUri, string uploadToken, Stream stream, string fileName, string sha1, Dictionary<string, string> fileInfo = null, string contentType = null)
+        public static async Task<B2FileInfo> UploadFile(Uri uploadUri, string uploadToken, Stream stream, string fileName, string sha1, Dictionary<string, string> fileInfo = null, string contentType = null)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, uploadUri);
 
@@ -155,7 +154,7 @@ namespace B2Lib
             if (resp.StatusCode != HttpStatusCode.OK)
                 await HandleErrorResponse(resp);
 
-            return JsonConvert.DeserializeObject<B2FileUploadResult>(await resp.Content.ReadAsStringAsync());
+            return JsonConvert.DeserializeObject<B2FileInfo>(await resp.Content.ReadAsStringAsync());
         }
 
         public static async Task<B2FileDownloadResult> DownloadFileHead(Uri downloadUri, string fileId, string authToken = null)
