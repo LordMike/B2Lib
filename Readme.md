@@ -23,6 +23,13 @@ Todo
  - Handle changes to the API (B2 is still in Beta)
  - Extend the unit test coverage
 
+In General
+-------
+
+- `B2Communicator` this is a class which provides low-level API call functions. You can use this in your own scenarios. It's the base of `B2Client`.
+- `B2Client` this is your entry point to the B2 API. It will handle the meta-operations, such as hooking authentication up and allowing you to cache frequently accessed data. It also provides simpler interfaces in to listing, downloading and uploading files.
+
+
 Examples
 --------
 
