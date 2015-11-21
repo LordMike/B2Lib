@@ -231,6 +231,11 @@ namespace B2Lib
             return DeleteFile(file.FileName, file.FileId);
         }
 
+        public Task<bool> DeleteFile(B2FileInfo file)
+        {
+            return DeleteFile(file.FileName, file.FileId);
+        }
+
         public async Task<bool> DeleteFile(string fileName, string fileId)
         {
             ThrowExceptionIfNotAuthorized();
