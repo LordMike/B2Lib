@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>B2Lib</id>
+        <version>$version$</version>
+        <authors>LordMike</authors>
+        <owners>LordMike</owners>
+        <licenseUrl>https://github.com/LordMike/B2Lib/blob/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/LordMike/B2Lib</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>.NET client library for Backblaze.com's B2 service</description>
+        <summary>.NET client library for Backblaze.com's B2 service</summary>
+        <releaseNotes />
+        <copyright>Copyright 2015 Michael Bisbjerg</copyright>
+        <dependencies>
+            <dependency id="Newtonsoft.Json" version="7.0.1" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="bin\Release\B2Lib.dll" target="lib\net45\B2Lib.dll" />
+        <file src="bin\Release\B2Lib.pdb" target="lib\net45\B2Lib.pdb" />
+    </files>
+</package>
