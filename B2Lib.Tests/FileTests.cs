@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using B2Lib.Enums;
 using B2Lib.Exceptions;
 using B2Lib.Objects;
+using B2Lib.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace B2Lib.Tests
@@ -54,6 +55,50 @@ namespace B2Lib.Tests
             catch (Exception)
             {
             }
+        }
+
+        [TestMethod]
+        public void ListMultiplePages()
+        {
+            File.WriteAllText(_tmpPath, "Testworld,123");
+
+            List<B2FileInfo> files = new List<B2FileInfo>();
+
+            // Upload it 
+            Parallel.For(1, 10, i =>
+            {
+                B2FileInfo file = _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test-pages-" + i).Result;
+                TestFileContents(file);
+
+                lock (files)
+                files.Add(file);
+            });
+
+            // Get enumerators
+            B2FilesIterator listFiles = _client.ListFiles(_bucket) as B2FilesIterator;
+            B2FileVersionsIterator listFileVersions = _client.ListFileVersions(_bucket) as B2FileVersionsIterator;
+
+            Assert.IsNotNull(listFiles);
+            Assert.IsNotNull(listFileVersions);
+
+            listFiles.PageSize = 2;
+            listFileVersions.PageSize = 2;
+
+            // Enumerate it
+            List<B2FileWithSize> list = listFiles.ToList();
+            List<B2FileWithSize> listVersions = listFileVersions.ToList();
+
+            foreach (B2FileInfo expected in files)
+            {
+                Assert.IsTrue(list.Any(s => s.FileId == expected.FileId));
+                Assert.IsTrue(listVersions.Any(s => s.FileId == expected.FileId));
+            }
+
+            // Delete files
+            Parallel.ForEach(files, info =>
+            {
+                _client.DeleteFile(info).Wait();
+            });
         }
 
         [TestMethod]
