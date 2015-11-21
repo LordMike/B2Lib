@@ -21,7 +21,11 @@ namespace TestApplication
                 client.LoadState("state");
             else
             {
-                client.Login("", "").Wait();
+                // To protect credentials from being committed, they've been put in a text file at: MyDocuments\B2Auth.txt
+                // The text goes in two lines, with AccountId being the first, and ApplicationKey the second.
+                string[] lines = File.ReadAllLines(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "B2Auth.txt"));
+
+                client.Login(lines[0], lines[1]).Wait();
                 client.SaveState("state");
             }
 
