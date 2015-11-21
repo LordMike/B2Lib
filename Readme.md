@@ -3,7 +3,7 @@ B2Lib
 
 A .NET library for backblaze.com's B2 service.
 
-Nuget (Coming soon)
+Nuget
 -----
 
 Install from Nuget using the command: **Install-Package B2Lib**
