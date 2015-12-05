@@ -15,24 +15,24 @@ namespace B2Lib.Tests
             const string name = "test-bucket-b2lib";
 
             B2Client client = new B2Client();
-            client.Login(TestConfig.AccountId, TestConfig.ApplicationKey).Wait();
+            client.Login(TestConfig.AccountId, TestConfig.ApplicationKey);
 
             // Create
-            B2Bucket bucket = client.CreateBucket(name, B2BucketType.AllPrivate).Result;
+            B2Bucket bucket = client.CreateBucket(name, B2BucketType.AllPrivate);
             TestBucketContents(bucket, B2BucketType.AllPrivate);
 
             // Verify using a list
             VerifyBucketInList(client, true, name, B2BucketType.AllPrivate);
 
             // Update
-            bucket = client.UpdateBucket(bucket, B2BucketType.AllPublic).Result;
+            bucket = client.UpdateBucket(bucket, B2BucketType.AllPublic);
             TestBucketContents(bucket, B2BucketType.AllPublic);
 
             // Verify using a list
             VerifyBucketInList(client, true, name, B2BucketType.AllPublic);
 
             // Delete
-            bucket = client.DeleteBucket(bucket).Result;
+            bucket = client.DeleteBucket(bucket);
             TestBucketContents(bucket, B2BucketType.AllPublic);
 
             // Verify using a list
@@ -41,7 +41,7 @@ namespace B2Lib.Tests
 
         private void VerifyBucketInList(B2Client client, bool shouldExist, string bucketName, B2BucketType expectedType)
         {
-            List<B2Bucket> list = client.ListBuckets().Result;
+            List<B2Bucket> list = client.ListBuckets();
 
             bool exists = list.Any(s => s.BucketName == bucketName && s.BucketType == expectedType);
             if (shouldExist)

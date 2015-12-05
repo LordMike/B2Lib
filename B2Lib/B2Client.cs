@@ -78,7 +78,19 @@ namespace B2Lib
                 throw new B2MissingAuthenticationException("You must call Login() or LoadState() first");
         }
 
-        public async Task<B2Bucket> GetBucketById(string bucketId)
+        public B2Bucket GetBucketById(string bucketId)
+        {
+            try
+            {
+                return GetBucketByIdAsync(bucketId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<B2Bucket> GetBucketByIdAsync(string bucketId)
         {
             B2BucketCache item = _bucketCache.GetById(bucketId);
 
@@ -86,12 +98,24 @@ namespace B2Lib
                 return item.CreateBucketClass();
 
             // Fetch
-            List<B2Bucket> buckets = await ListBuckets();
+            List<B2Bucket> buckets = await ListBucketsAsync();
 
             return buckets.FirstOrDefault(s => s.BucketId == bucketId);
         }
 
-        public async Task<B2Bucket> GetBucketByName(string name)
+        public B2Bucket GetBucketByName(string name)
+        {
+            try
+            {
+                return GetBucketByNameAsync(name).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<B2Bucket> GetBucketByNameAsync(string name)
         {
             B2BucketCache item = _bucketCache.GetByName(name);
 
@@ -99,12 +123,24 @@ namespace B2Lib
                 return item.CreateBucketClass();
 
             // Fetch
-            List<B2Bucket> buckets = await ListBuckets();
+            List<B2Bucket> buckets = await ListBucketsAsync();
 
             return buckets.FirstOrDefault(s => s.BucketName == name);
         }
 
-        public async Task Login(string accountId, string applicationKey)
+        public void Login(string accountId, string applicationKey)
+        {
+            try
+            {
+                LoginAsync(accountId, applicationKey).Wait();
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task LoginAsync(string accountId, string applicationKey)
         {
             B2AuthenticationResponse result = await B2Communicator.Login(accountId, applicationKey);
 
@@ -115,12 +151,36 @@ namespace B2Lib
             _downloadUrl = result.DownloadUrl;
         }
 
-        public async Task<List<B2Bucket>> ListBuckets()
+        public List<B2Bucket> ListBuckets()
         {
-            return await ListBuckets(_accountId);
+            try
+            {
+                return ListBucketsAsync().Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
         }
 
-        public async Task<List<B2Bucket>> ListBuckets(string accountId)
+        public async Task<List<B2Bucket>> ListBucketsAsync()
+        {
+            return await ListBucketsAsync(_accountId);
+        }
+
+        public List<B2Bucket> ListBuckets(string accountId)
+        {
+            try
+            {
+                return ListBucketsAsync(accountId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<List<B2Bucket>> ListBucketsAsync(string accountId)
         {
             ThrowExceptionIfNotAuthorized();
 
@@ -131,12 +191,36 @@ namespace B2Lib
             return result;
         }
 
-        public Task<B2Bucket> CreateBucket(string name, B2BucketType bucketType)
+        public B2Bucket CreateBucket(string name, B2BucketType bucketType)
         {
-            return CreateBucket(_accountId, name, bucketType);
+            try
+            {
+                return CreateBucketAsync(name, bucketType).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
         }
 
-        public async Task<B2Bucket> CreateBucket(string accountId, string name, B2BucketType bucketType)
+        public Task<B2Bucket> CreateBucketAsync(string name, B2BucketType bucketType)
+        {
+            return CreateBucketAsync(_accountId, name, bucketType);
+        }
+
+        public B2Bucket CreateBucket(string accountId, string name, B2BucketType bucketType)
+        {
+            try
+            {
+                return CreateBucketAsync(accountId, name, bucketType).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<B2Bucket> CreateBucketAsync(string accountId, string name, B2BucketType bucketType)
         {
             ThrowExceptionIfNotAuthorized();
 
@@ -147,17 +231,53 @@ namespace B2Lib
             return res;
         }
 
-        public async Task<B2Bucket> DeleteBucket(string bucketId)
+        public B2Bucket DeleteBucket(string bucketId)
         {
-            return await DeleteBucket(_accountId, bucketId);
+            try
+            {
+                return DeleteBucketAsync(_accountId, bucketId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
         }
 
-        public async Task<B2Bucket> DeleteBucket(B2Bucket bucket)
+        public async Task<B2Bucket> DeleteBucketAsync(string bucketId)
         {
-            return await DeleteBucket(bucket.AccountId, bucket.BucketId);
+            return await DeleteBucketAsync(_accountId, bucketId);
         }
 
-        public async Task<B2Bucket> DeleteBucket(string accountId, string bucketId)
+        public B2Bucket DeleteBucket(B2Bucket bucket)
+        {
+            try
+            {
+                return DeleteBucketAsync(bucket.AccountId, bucket.BucketId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<B2Bucket> DeleteBucketAsync(B2Bucket bucket)
+        {
+            return await DeleteBucketAsync(bucket.AccountId, bucket.BucketId);
+        }
+
+        public B2Bucket DeleteBucket(string accountId, string bucketId)
+        {
+            try
+            {
+                return DeleteBucketAsync(accountId, bucketId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<B2Bucket> DeleteBucketAsync(string accountId, string bucketId)
         {
             ThrowExceptionIfNotAuthorized();
 
@@ -168,17 +288,53 @@ namespace B2Lib
             return res;
         }
 
-        public async Task<B2Bucket> UpdateBucket(string bucketId, B2BucketType bucketType)
+        public B2Bucket UpdateBucket(string bucketId, B2BucketType bucketType)
         {
-            return await UpdateBucket(_accountId, bucketId, bucketType);
+            try
+            {
+                return UpdateBucketAsync(_accountId, bucketId, bucketType).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
         }
 
-        public async Task<B2Bucket> UpdateBucket(B2Bucket bucket, B2BucketType bucketType)
+        public async Task<B2Bucket> UpdateBucketAsync(string bucketId, B2BucketType bucketType)
         {
-            return await UpdateBucket(bucket.AccountId, bucket.BucketId, bucketType);
+            return await UpdateBucketAsync(_accountId, bucketId, bucketType);
         }
 
-        public async Task<B2Bucket> UpdateBucket(string accountId, string bucketId, B2BucketType bucketType)
+        public B2Bucket UpdateBucket(B2Bucket bucket, B2BucketType bucketType)
+        {
+            try
+            {
+                return UpdateBucketAsync(bucket.AccountId, bucket.BucketId, bucketType).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<B2Bucket> UpdateBucketAsync(B2Bucket bucket, B2BucketType bucketType)
+        {
+            return await UpdateBucketAsync(bucket.AccountId, bucket.BucketId, bucketType);
+        }
+
+        public B2Bucket UpdateBucket(string accountId, string bucketId, B2BucketType bucketType)
+        {
+            try
+            {
+                return UpdateBucketAsync(accountId, bucketId, bucketType).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<B2Bucket> UpdateBucketAsync(string accountId, string bucketId, B2BucketType bucketType)
         {
             ThrowExceptionIfNotAuthorized();
 
@@ -189,22 +345,70 @@ namespace B2Lib
             return res;
         }
 
-        public async Task<B2FileBase> HideFile(string bucketId, B2FileBase file)
+        public B2FileBase HideFile(string bucketId, B2FileBase file)
         {
-            return await HideFile(bucketId, file.FileName);
+            try
+            {
+                return HideFileAsync(bucketId, file.FileName).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
         }
 
-        public async Task<B2FileBase> HideFile(B2Bucket bucket, B2FileBase file)
+        public async Task<B2FileBase> HideFileAsync(string bucketId, B2FileBase file)
         {
-            return await HideFile(bucket.BucketId, file.FileName);
+            return await HideFileAsync(bucketId, file.FileName);
         }
 
-        public async Task<B2FileBase> HideFile(B2Bucket bucket, string fileName)
+        public B2FileBase HideFile(B2Bucket bucket, B2FileBase file)
         {
-            return await HideFile(bucket.BucketId, fileName);
+            try
+            {
+                return HideFileAsync(bucket.BucketId, file.FileName).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
         }
 
-        public async Task<B2FileBase> HideFile(string bucketId, string fileName)
+        public async Task<B2FileBase> HideFileAsync(B2Bucket bucket, B2FileBase file)
+        {
+            return await HideFileAsync(bucket.BucketId, file.FileName);
+        }
+
+        public B2FileBase HideFile(B2Bucket bucket, string fileName)
+        {
+            try
+            {
+                return HideFileAsync(bucket.BucketId, fileName).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<B2FileBase> HideFileAsync(B2Bucket bucket, string fileName)
+        {
+            return await HideFileAsync(bucket.BucketId, fileName);
+        }
+
+        public B2FileBase HideFile(string bucketId, string fileName)
+        {
+            try
+            {
+                return HideFileAsync(bucketId, fileName).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<B2FileBase> HideFileAsync(string bucketId, string fileName)
         {
             ThrowExceptionIfNotAuthorized();
 
@@ -213,12 +417,36 @@ namespace B2Lib
             return res;
         }
 
-        public async Task<B2FileInfo> GetFileInfo(B2FileBase file)
+        public B2FileInfo GetFileInfo(B2FileBase file)
         {
-            return await GetFileInfo(file.FileId);
+            try
+            {
+                return GetFileInfoAsync(file.FileId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
         }
 
-        public async Task<B2FileInfo> GetFileInfo(string fileId)
+        public async Task<B2FileInfo> GetFileInfoAsync(B2FileBase file)
+        {
+            return await GetFileInfoAsync(file.FileId);
+        }
+
+        public B2FileInfo GetFileInfo(string fileId)
+        {
+            try
+            {
+                return GetFileInfoAsync(fileId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<B2FileInfo> GetFileInfoAsync(string fileId)
         {
             ThrowExceptionIfNotAuthorized();
 
@@ -227,17 +455,53 @@ namespace B2Lib
             return res;
         }
 
-        public Task<bool> DeleteFile(B2FileBase file)
+        public bool DeleteFile(B2FileBase file)
         {
-            return DeleteFile(file.FileName, file.FileId);
+            try
+            {
+                return DeleteFileAsync(file.FileName, file.FileId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
         }
 
-        public Task<bool> DeleteFile(B2FileInfo file)
+        public Task<bool> DeleteFileAsync(B2FileBase file)
         {
-            return DeleteFile(file.FileName, file.FileId);
+            return DeleteFileAsync(file.FileName, file.FileId);
         }
 
-        public async Task<bool> DeleteFile(string fileName, string fileId)
+        public bool DeleteFile(B2FileInfo file)
+        {
+            try
+            {
+                return DeleteFileAsync(file.FileName, file.FileId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public Task<bool> DeleteFileAsync(B2FileInfo file)
+        {
+            return DeleteFileAsync(file.FileName, file.FileId);
+        }
+
+        public bool DeleteFile(string fileName, string fileId)
+        {
+            try
+            {
+                return DeleteFileAsync(fileName, fileId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<bool> DeleteFileAsync(string fileName, string fileId)
         {
             ThrowExceptionIfNotAuthorized();
 
@@ -266,24 +530,47 @@ namespace B2Lib
             return new B2FileVersionsIterator(_apiUrl, _authorizationToken, bucketId, startFileName, startFileId);
         }
 
-        public Task<B2FileInfo> UploadFile(B2Bucket bucket, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
+        public B2FileInfo UploadFile(B2Bucket bucket, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
         {
-            return UploadFile(bucket.BucketId, file, fileName, fileInfo, contentType);
+            try
+            {
+                return UploadFileAsync(bucket.BucketId, file, fileName, fileInfo, contentType).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
         }
 
-        public async Task<B2FileInfo> UploadFile(string bucketId, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
+        public Task<B2FileInfo> UploadFileAsync(B2Bucket bucket, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
+        {
+            return UploadFileAsync(bucket.BucketId, file, fileName, fileInfo, contentType);
+        }
+
+        public B2FileInfo UploadFile(string bucketId, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
+        {
+            try
+            {
+                return UploadFileAsync(bucketId, file, fileName, fileInfo, contentType).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<B2FileInfo> UploadFileAsync(string bucketId, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
         {
             B2BucketCache uploadConfig = await Task.Run(() => FetchUploadUrl(bucketId));
 
-            using (var fs = File.OpenRead(file.FullName))
+            using (FileStream fs = File.OpenRead(file.FullName))
             using (SHA1CryptoServiceProvider sha1 = new SHA1CryptoServiceProvider())
             {
                 string hash = BitConverter.ToString(sha1.ComputeHash(fs)).Replace("-", "");
 
                 fs.Seek(0, SeekOrigin.Begin);
 
-                B2FileInfo res = await B2Communicator.UploadFile(uploadConfig.UploadUri, uploadConfig.UploadAuthorizationToken, fs, fileName,
-                     hash, fileInfo, contentType);
+                B2FileInfo res = await B2Communicator.UploadFile(uploadConfig.UploadUri, uploadConfig.UploadAuthorizationToken, fs, fileName, hash, fileInfo, contentType);
 
                 return res;
             }
@@ -315,12 +602,36 @@ namespace B2Lib
             }
         }
 
-        public async Task<B2FileDownloadResult> DownloadFileHead(B2FileBase file)
+        public B2FileDownloadResult DownloadFileHead(B2FileBase file)
         {
-            return await DownloadFileHead(file.FileId);
+            try
+            {
+                return DownloadFileHeadAsync(file.FileId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
         }
 
-        public async Task<B2FileDownloadResult> DownloadFileHead(string fileId)
+        public async Task<B2FileDownloadResult> DownloadFileHeadAsync(B2FileBase file)
+        {
+            return await DownloadFileHeadAsync(file.FileId);
+        }
+
+        public B2FileDownloadResult DownloadFileHead(string fileId)
+        {
+            try
+            {
+                return DownloadFileHeadAsync(fileId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
+        public async Task<B2FileDownloadResult> DownloadFileHeadAsync(string fileId)
         {
             ThrowExceptionIfNotAuthorized();
 

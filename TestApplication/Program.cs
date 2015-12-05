@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using B2Lib;
 using B2Lib.Enums;
@@ -25,24 +23,24 @@ namespace TestApplication
                 // The text goes in two lines, with AccountId being the first, and ApplicationKey the second.
                 string[] lines = File.ReadAllLines(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "B2Auth.txt"));
 
-                client.Login(lines[0], lines[1]).Wait();
+                client.Login(lines[0], lines[1]);
                 client.SaveState("state");
             }
 
             string name = "test-123";
-            B2Bucket bck = client.GetBucketByName(name).Result;
+            B2Bucket bck = client.GetBucketByName(name);
             if (bck == null)
             {
-                bck = client.CreateBucket(name, B2BucketType.AllPrivate).Result;
+                bck = client.CreateBucket(name, B2BucketType.AllPrivate);
             }
 
             List<B2FileWithSize> files = client.ListFileVersions(bck).ToList();
             Console.WriteLine(files.Count);
 
             Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 30 }, file =>
-              {
-                  client.DeleteFile(file).Wait();
-              });
+            {
+                client.DeleteFile(file);
+            });
 
             //client.UploadFile(bck, new FileInfo("state"), "state", new Dictionary<string, string> { { "test", "\"" } }).Wait();
 

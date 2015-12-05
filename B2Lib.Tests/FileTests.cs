@@ -23,15 +23,15 @@ namespace B2Lib.Tests
         public static void TestSetup(TestContext context)
         {
             _client = new B2Client();
-            _client.Login(TestConfig.AccountId, TestConfig.ApplicationKey).Wait();
+            _client.Login(TestConfig.AccountId, TestConfig.ApplicationKey);
 
             try
             {
-                _bucket = _client.CreateBucket("test-bucket-b2lib", B2BucketType.AllPrivate).Result;
+                _bucket = _client.CreateBucket("test-bucket-b2lib", B2BucketType.AllPrivate);
             }
             catch (Exception)
             {
-                _bucket = _client.GetBucketByName("test-bucket-b2lib").Result;
+                _bucket = _client.GetBucketByName("test-bucket-b2lib");
             }
 
             _tmpPath = Path.GetRandomFileName();
@@ -43,9 +43,9 @@ namespace B2Lib.Tests
             List<B2FileWithSize> files = _client.ListFileVersions(_bucket).ToList();
 
             foreach (B2FileWithSize file in files)
-                _client.DeleteFile(file).Wait();
+                _client.DeleteFile(file);
 
-            _client.DeleteBucket(_bucket).Wait();
+            _client.DeleteBucket(_bucket);
 
             try
             {
@@ -67,7 +67,7 @@ namespace B2Lib.Tests
             // Upload it 
             Parallel.For(1, 10, i =>
             {
-                B2FileInfo file = _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test-pages-" + i).Result;
+                B2FileInfo file = _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test-pages-" + i);
                 TestFileContents(file);
 
                 lock (files)
@@ -97,21 +97,21 @@ namespace B2Lib.Tests
             // Delete files
             Parallel.ForEach(files, info =>
             {
-                _client.DeleteFile(info).Wait();
+                _client.DeleteFile(info);
             });
         }
 
         [TestMethod]
-        public async Task UploadFileVersionsListDelete()
+        public void UploadFileVersionsListDelete()
         {
             File.WriteAllText(_tmpPath, "Testworld,123");
 
             // Upload it 
-            B2FileInfo file1 = await _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test");
+            B2FileInfo file1 = _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test");
             TestFileContents(file1);
 
             // Upload again
-            B2FileInfo file2 = await _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test");
+            B2FileInfo file2 = _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test");
             TestFileContents(file2);
 
             // Enumerate it
@@ -128,8 +128,8 @@ namespace B2Lib.Tests
             }
 
             // Delete file
-            _client.DeleteFile(file1).Wait();
-            _client.DeleteFile(file2).Wait();
+            _client.DeleteFile(file1);
+            _client.DeleteFile(file2);
 
             // Ensure list is blank
             list = _client.ListFileVersions(_bucket).ToList();
@@ -138,12 +138,12 @@ namespace B2Lib.Tests
         }
 
         [TestMethod]
-        public async Task UploadFileListDelete()
+        public void UploadFileListDelete()
         {
             File.WriteAllText(_tmpPath, "Testworld,123");
 
             // Upload it 
-            B2FileInfo file = await _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test");
+            B2FileInfo file = _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test");
             TestFileContents(file);
 
             // Enumerate it
@@ -153,7 +153,7 @@ namespace B2Lib.Tests
             TestFileContents(listFile, B2FileAction.Upload);
 
             // Delete file
-            _client.DeleteFile(file).Wait();
+            _client.DeleteFile(file);
 
             // Ensure list is blank
             list = _client.ListFiles(_bucket).ToList();
@@ -161,7 +161,7 @@ namespace B2Lib.Tests
         }
 
         [TestMethod]
-        public async Task UploadFileHideDelete()
+        public void UploadFileHideDelete()
         {
             // B2 has a weird way of working with hidden files
             // Read more here: https://www.backblaze.com/b2/docs/file_versions.html
@@ -169,7 +169,7 @@ namespace B2Lib.Tests
             File.WriteAllText(_tmpPath, "Testworld,123");
 
             // Upload it 
-            B2FileInfo file = await _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test");
+            B2FileInfo file = _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test");
             TestFileContents(file);
 
             // Enumerate it
@@ -179,7 +179,7 @@ namespace B2Lib.Tests
             TestFileContents(listFile, B2FileAction.Upload);
 
             // Hide it
-            B2FileBase hideFileItem = await _client.HideFile(_bucket, listFile);
+            B2FileBase hideFileItem = _client.HideFile(_bucket, listFile);
 
             // Enumerate it (it should now be hidden)
             list = _client.ListFiles(_bucket).ToList();
@@ -196,7 +196,7 @@ namespace B2Lib.Tests
             TestFileContents(listFile, B2FileAction.Upload);
 
             // Delete file
-            _client.DeleteFile(file).Wait();
+            _client.DeleteFile(file);
 
             // Ensure list is blank
             list = _client.ListFiles(_bucket).ToList();
@@ -204,28 +204,28 @@ namespace B2Lib.Tests
         }
 
         [TestMethod]
-        public async Task UploadFileGetInfoDelete()
+        public void UploadFileGetInfoDelete()
         {
             File.WriteAllText(_tmpPath, "Testworld,123");
 
             // Upload it 
-            B2FileInfo file = await _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test");
+            B2FileInfo file = _client.UploadFile(_bucket, new FileInfo(_tmpPath), "test");
             TestFileContents(file);
 
             // Fetch info
-            B2FileInfo info = await _client.GetFileInfo(file.FileId);
+            B2FileInfo info = _client.GetFileInfo(file.FileId);
             TestFileContents(info);
 
             Assert.AreEqual(file.FileId, info.FileId);
             Assert.AreEqual(file.ContentLength, info.ContentLength);
 
             // Delete file
-            _client.DeleteFile(info).Wait();
+            _client.DeleteFile(info);
 
             // Ensure info is blank
             try
             {
-                info = await _client.GetFileInfo(file.FileId);
+                info = _client.GetFileInfo(file.FileId);
 
                 Assert.Fail();
             }
