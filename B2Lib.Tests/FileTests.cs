@@ -231,7 +231,7 @@ namespace B2Lib.Tests
             }
             catch (B2Exception ex)
             {
-                Assert.AreEqual(HttpStatusCode.InternalServerError, ex.HttpStatusCode);
+                Assert.AreEqual(HttpStatusCode.NotFound, ex.HttpStatusCode);
             }
         }
 
