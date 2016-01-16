@@ -44,6 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\VersionInfo.cs">
+      <Link>Properties\VersionInfo.cs</Link>
+    </Compile>
     <Compile Include="Objects\B2DownloadResult.cs" />
     <Compile Include="Utilities\B2BucketCacher.cs" />
     <Compile Include="B2Client.cs" />
