@@ -1,5 +1,9 @@
 ﻿using System.Reflection;
-using System.Runtime.InteropServices;
 
+// Versions
 [assembly: AssemblyVersion("0.0.2.0")]
 [assembly: AssemblyFileVersion("0.0.2.0")]
+
+// Generic data
+[assembly: AssemblyCompany("MBWarez")]
+[assembly: AssemblyCopyright("Copyright © 2016 Michael Bisbjerg")]

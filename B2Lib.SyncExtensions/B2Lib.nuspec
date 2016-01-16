@@ -1,19 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
-        <id>B2Lib</id>
+        <id>B2Lib.SyncExtensions</id>
         <version>$version$</version>
         <authors>LordMike</authors>
         <owners>LordMike</owners>
         <licenseUrl>https://github.com/LordMike/B2Lib/blob/master/LICENSE</licenseUrl>
         <projectUrl>https://github.com/LordMike/B2Lib</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>.NET client library for Backblaze.com's B2 service</description>
-        <summary>.NET client library for Backblaze.com's B2 service</summary>
+        <description>Synchronous method extensions for the .NET Client library for B2</description>
+        <summary>Synchronous method extensions for the .NET Client library for B2</summary>
         <releaseNotes />
         <copyright>Copyright 2016 Michael Bisbjerg</copyright>
         <dependencies>
-            <dependency id="Newtonsoft.Json" version="7.0.1" />
+            <dependency id="B2Lib" version="$version$" />
         </dependencies>
     </metadata>
     <files>
