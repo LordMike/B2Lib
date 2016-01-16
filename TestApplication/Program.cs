@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using B2Lib;
 using B2Lib.Enums;
 using B2Lib.Objects;
+using B2Lib.SyncExtensions;
 
 namespace TestApplication
 {

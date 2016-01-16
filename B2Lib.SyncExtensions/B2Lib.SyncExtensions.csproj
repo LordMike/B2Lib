@@ -4,17 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1E2A30CC-4660-4985-9050-1B6AB6758419}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{1F83C227-1716-4FD1-B9DE-E804E449B5D4}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TestApplication</RootNamespace>
-    <AssemblyName>TestApplication</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <RootNamespace>B2Lib.SyncExtensions</RootNamespace>
+    <AssemblyName>B2Lib.SyncExtensions</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -43,19 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="B2LibSyncExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\B2Lib.SyncExtensions\B2Lib.SyncExtensions.csproj">
-      <Project>{1F83C227-1716-4FD1-B9DE-E804E449B5D4}</Project>
-      <Name>B2Lib.SyncExtensions</Name>
-    </ProjectReference>
     <ProjectReference Include="..\B2Lib\B2Lib.csproj">
-      <Project>{611D9B5B-8AE1-4137-B1D4-9FBF996F704E}</Project>
+      <Project>{611d9b5b-8ae1-4137-b1d4-9fbf996f704e}</Project>
       <Name>B2Lib</Name>
     </ProjectReference>
   </ItemGroup>

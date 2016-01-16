@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Objects\B2DownloadResult.cs" />
     <Compile Include="Utilities\B2BucketCacher.cs" />
     <Compile Include="B2Client.cs" />
     <Compile Include="Exceptions\B2AuthenticationException.cs" />

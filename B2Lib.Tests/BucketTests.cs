@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using B2Lib.Enums;
 using B2Lib.Objects;
+using B2Lib.SyncExtensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace B2Lib.Tests

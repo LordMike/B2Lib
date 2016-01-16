@@ -56,6 +56,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\B2Lib.SyncExtensions\B2Lib.SyncExtensions.csproj">
+      <Project>{1F83C227-1716-4FD1-B9DE-E804E449B5D4}</Project>
+      <Name>B2Lib.SyncExtensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\B2Lib\B2Lib.csproj">
       <Project>{611D9B5B-8AE1-4137-B1D4-9FBF996F704E}</Project>
       <Name>B2Lib</Name>

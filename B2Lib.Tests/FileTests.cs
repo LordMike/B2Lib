@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using B2Lib.Enums;
 using B2Lib.Exceptions;
 using B2Lib.Objects;
+using B2Lib.SyncExtensions;
 using B2Lib.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -247,7 +248,6 @@ namespace B2Lib.Tests
             Assert.IsTrue(file.ContentLength > 0);
 
             Assert.IsNotNull(file.FileInfo);
-
         }
 
         private void TestFileContents(B2FileWithSize file, B2FileAction expectedAction)

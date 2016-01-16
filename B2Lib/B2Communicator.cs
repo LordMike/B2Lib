@@ -193,7 +193,7 @@ namespace B2Lib
             return res;
         }
 
-        public static Stream DownloadFileContent(Uri downloadUri, string fileId, out B2FileDownloadResult info, string authToken = null)
+        public static async Task<B2DownloadResult> DownloadFileContent(Uri downloadUri, string fileId, string authToken = null)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Get, new Uri(downloadUri, "/b2api/v1/b2_download_file_by_id?fileId=" + fileId));
 
@@ -205,7 +205,7 @@ namespace B2Lib
             if (resp.StatusCode != HttpStatusCode.OK)
                 HandleErrorResponse(resp).Wait();
 
-            info = new B2FileDownloadResult();
+            B2FileDownloadResult info = new B2FileDownloadResult();
 
             info.FileId = resp.Headers.GetValues("X-Bz-File-Id").First();
             info.FileName = resp.Headers.GetValues("X-Bz-File-Name").First();
@@ -226,7 +226,12 @@ namespace B2Lib
                 info.FileInfo[pair.Key.Substring("X-Bz-Info-".Length)] = pair.Value.First();
             }
 
-            return resp.Content.ReadAsStreamAsync().Result;
+            B2DownloadResult result = new B2DownloadResult();
+
+            result.Info = info;
+            result.Stream = await resp.Content.ReadAsStreamAsync();
+            
+            return result;
         }
     }
 }
