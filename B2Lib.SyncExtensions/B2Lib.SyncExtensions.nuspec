@@ -13,7 +13,7 @@
         <releaseNotes />
         <copyright>Copyright 2016 Michael Bisbjerg</copyright>
         <dependencies>
-            <dependency id="B2Lib" version="$version$" />
+            <dependency id="B2Lib" version="[$version$]" />
         </dependencies>
     </metadata>
     <files>
