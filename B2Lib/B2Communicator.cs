@@ -139,7 +139,7 @@ namespace B2Lib
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, uploadUri);
 
             msg.Headers.Authorization = new AuthenticationHeaderValue(uploadToken);
-            msg.Headers.Add("X-Bz-File-Name", fileName);
+            msg.Headers.Add("X-Bz-File-Name", WebUtility.UrlEncode(fileName));
             msg.Headers.Add("X-Bz-Content-Sha1", sha1);
 
             if (fileInfo != null)
