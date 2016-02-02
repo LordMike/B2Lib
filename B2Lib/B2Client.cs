@@ -15,19 +15,38 @@ namespace B2Lib
 {
     public class B2Client
     {
-        public string AuthorizationToken { get; private set; }
+        public string AuthorizationToken
+        {
+            get { return _communicator.AuthToken; }
+            private set { _communicator.AuthToken = value; }
+        }
         public string AccountId { get; private set; }
 
         private ConcurrentDictionary<string, ConcurrentBag<B2UploadConfiguration>> _bucketUploadUrls;
         private B2BucketCacher _bucketCache;
 
+        private B2Communicator _communicator;
+
         public Uri ApiUrl { get; private set; }
         public Uri DownloadUrl { get; private set; }
+
+        public TimeSpan TimeoutMeta
+        {
+            get { return _communicator.TimeoutMeta; }
+            set { _communicator.TimeoutMeta = value; }
+        }
+
+        public TimeSpan TimeoutData
+        {
+            get { return _communicator.TimeoutData; }
+            set { _communicator.TimeoutData = value; }
+        }
 
         public B2Client()
         {
             _bucketUploadUrls = new ConcurrentDictionary<string, ConcurrentBag<B2UploadConfiguration>>();
             _bucketCache = new B2BucketCacher();
+            _communicator = new B2Communicator();
         }
 
         public void LoadState(B2SaveState state)
@@ -104,7 +123,7 @@ namespace B2Lib
 
         public async Task LoginAsync(string accountId, string applicationKey)
         {
-            B2AuthenticationResponse result = await B2Communicator.Login(accountId, applicationKey);
+            B2AuthenticationResponse result = await _communicator.Login(accountId, applicationKey);
 
             AccountId = result.AccountId;
             AuthorizationToken = result.AuthorizationToken;
@@ -122,7 +141,7 @@ namespace B2Lib
         {
             ThrowExceptionIfNotAuthorized();
 
-            List<B2Bucket> result = await B2Communicator.ListBuckets(ApiUrl, AuthorizationToken, accountId);
+            List<B2Bucket> result = await _communicator.ListBuckets(ApiUrl, accountId);
 
             _bucketCache.RecordBucket(result);
 
@@ -138,7 +157,7 @@ namespace B2Lib
         {
             ThrowExceptionIfNotAuthorized();
 
-            B2Bucket res = await B2Communicator.CreateBucket(ApiUrl, AuthorizationToken, accountId, name, bucketType);
+            B2Bucket res = await _communicator.CreateBucket(ApiUrl, accountId, name, bucketType);
 
             _bucketCache.RecordBucket(res);
 
@@ -159,7 +178,7 @@ namespace B2Lib
         {
             ThrowExceptionIfNotAuthorized();
 
-            B2Bucket res = await B2Communicator.DeleteBucket(ApiUrl, AuthorizationToken, accountId, bucketId);
+            B2Bucket res = await _communicator.DeleteBucket(ApiUrl, accountId, bucketId);
 
             _bucketCache.RemoveBucket(res);
 
@@ -180,7 +199,7 @@ namespace B2Lib
         {
             ThrowExceptionIfNotAuthorized();
 
-            B2Bucket res = await B2Communicator.UpdateBucket(ApiUrl, AuthorizationToken, accountId, bucketId, bucketType);
+            B2Bucket res = await _communicator.UpdateBucket(ApiUrl, accountId, bucketId, bucketType);
 
             _bucketCache.RecordBucket(res);
 
@@ -206,7 +225,7 @@ namespace B2Lib
         {
             ThrowExceptionIfNotAuthorized();
 
-            B2FileBase res = await B2Communicator.HideFile(ApiUrl, AuthorizationToken, bucketId, fileName);
+            B2FileBase res = await _communicator.HideFile(ApiUrl, bucketId, fileName);
 
             return res;
         }
@@ -220,7 +239,7 @@ namespace B2Lib
         {
             ThrowExceptionIfNotAuthorized();
 
-            B2FileInfo res = await B2Communicator.GetFileInfo(ApiUrl, AuthorizationToken, fileId);
+            B2FileInfo res = await _communicator.GetFileInfo(ApiUrl, fileId);
 
             return res;
         }
@@ -239,29 +258,29 @@ namespace B2Lib
         {
             ThrowExceptionIfNotAuthorized();
 
-            bool res = await B2Communicator.DeleteFile(ApiUrl, AuthorizationToken, fileName, fileId);
+            bool res = await _communicator.DeleteFile(ApiUrl, fileName, fileId);
 
             return res;
         }
 
-        public IEnumerable<B2FileWithSize> ListFiles(B2Bucket bucket, string startFileName = null)
+        public B2FilesIterator ListFiles(B2Bucket bucket, string startFileName = null)
         {
             return ListFiles(bucket.BucketId, startFileName);
         }
 
-        public IEnumerable<B2FileWithSize> ListFiles(string bucketId, string startFileName = null)
+        public B2FilesIterator ListFiles(string bucketId, string startFileName = null)
         {
-            return new B2FilesIterator(ApiUrl, AuthorizationToken, bucketId, startFileName);
+            return new B2FilesIterator(_communicator, ApiUrl, bucketId, startFileName);
         }
 
-        public IEnumerable<B2FileWithSize> ListFileVersions(B2Bucket bucket, string startFileName = null, string startFileId = null)
+        public B2FileVersionsIterator ListFileVersions(B2Bucket bucket, string startFileName = null, string startFileId = null)
         {
             return ListFileVersions(bucket.BucketId, startFileName, startFileId);
         }
 
-        public IEnumerable<B2FileWithSize> ListFileVersions(string bucketId, string startFileName = null, string startFileId = null)
+        public B2FileVersionsIterator ListFileVersions(string bucketId, string startFileName = null, string startFileId = null)
         {
-            return new B2FileVersionsIterator(ApiUrl, AuthorizationToken, bucketId, startFileName, startFileId);
+            return new B2FileVersionsIterator(_communicator, ApiUrl, bucketId, startFileName, startFileId);
         }
 
         public async Task<B2FileInfo> UploadFileAsync(B2Bucket bucket, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
@@ -282,7 +301,7 @@ namespace B2Lib
 
                     fs.Seek(0, SeekOrigin.Begin);
 
-                    B2FileInfo res = await B2Communicator.UploadFile(uploadConfig.UploadUrl, uploadConfig.AuthorizationToken, fs, fileName, hash, fileInfo, contentType);
+                    B2FileInfo res = await _communicator.UploadFile(uploadConfig.UploadUrl, uploadConfig.AuthorizationToken, fs, fileName, hash, fileInfo, contentType);
 
                     return res;
                 }
@@ -312,7 +331,7 @@ namespace B2Lib
             B2UploadConfiguration res;
             try
             {
-                res = B2Communicator.GetUploadUrl(ApiUrl, AuthorizationToken, bucketId).Result;
+                res = _communicator.GetUploadUrl(ApiUrl, bucketId).Result;
             }
             catch (AggregateException ex)
             {
@@ -332,7 +351,7 @@ namespace B2Lib
         {
             ThrowExceptionIfNotAuthorized();
 
-            return await B2Communicator.DownloadFileHead(DownloadUrl, fileId, AuthorizationToken);
+            return await _communicator.DownloadFileHead(DownloadUrl, fileId, AuthorizationToken);
         }
 
         public async Task<B2DownloadResult> DownloadFileContent(B2FileBase file)
@@ -344,7 +363,7 @@ namespace B2Lib
         {
             ThrowExceptionIfNotAuthorized();
 
-            return await B2Communicator.DownloadFileContent(DownloadUrl, fileId, AuthorizationToken);
+            return await _communicator.DownloadFileContent(DownloadUrl, fileId, AuthorizationToken);
         }
     }
 }

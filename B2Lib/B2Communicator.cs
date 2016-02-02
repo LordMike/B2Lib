@@ -16,11 +16,27 @@ using Newtonsoft.Json;
 
 namespace B2Lib
 {
-    public static class B2Communicator
+    public class B2Communicator
     {
         private static readonly Uri UriAuth = new Uri("https://api.backblaze.com/b2api/v1/b2_authorize_account");
 
-        private static async Task HandleErrorResponse(HttpResponseMessage resp)
+        public TimeSpan TimeoutMeta { get; set; }
+        public TimeSpan TimeoutData { get; set; }
+
+        public string AuthToken { get; set; }
+
+        public B2Communicator()
+        {
+            TimeoutMeta = TimeSpan.FromMinutes(1);
+            TimeoutData = TimeSpan.FromMinutes(30);
+        }
+
+        private HttpClient GetHttpClient(bool isDataRequest)
+        {
+            return new HttpClient { Timeout = isDataRequest ? TimeoutData : TimeoutMeta };
+        }
+
+        private async Task HandleErrorResponse(HttpResponseMessage resp)
         {
             B2Error error = JsonConvert.DeserializeObject<B2Error>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
 
@@ -30,11 +46,14 @@ namespace B2Lib
             };
         }
 
-        private async static Task<HttpResponseMessage> InternalRequest(Uri apiUri, string authToken, string path, object body)
+        private async Task<HttpResponseMessage> InternalRequest(Uri apiUri, string path, object body)
         {
+            if (string.IsNullOrEmpty(AuthToken))
+                throw new ArgumentException("Value must be set", nameof(AuthToken));
+
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, new Uri(apiUri, path));
 
-            msg.Headers.Authorization = new AuthenticationHeaderValue(authToken);
+            msg.Headers.Authorization = new AuthenticationHeaderValue(AuthToken);
 
             if (body != null)
             {
@@ -42,7 +61,7 @@ namespace B2Lib
                 msg.Content = new StringContent(reqBody);
             }
 
-            HttpResponseMessage resp = await new HttpClient().SendAsync(msg).ConfigureAwait(false);
+            HttpResponseMessage resp = await GetHttpClient(false).SendAsync(msg).ConfigureAwait(false);
 
             if (resp.StatusCode != HttpStatusCode.OK)
                 await HandleErrorResponse(resp);
@@ -50,13 +69,13 @@ namespace B2Lib
             return resp;
         }
 
-        public static async Task<B2AuthenticationResponse> Login(string accountId, string applicationKey)
+        public async Task<B2AuthenticationResponse> Login(string accountId, string applicationKey)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Get, UriAuth);
 
             msg.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes(accountId + ":" + applicationKey)));
 
-            HttpResponseMessage resp = await new HttpClient().SendAsync(msg).ConfigureAwait(false);
+            HttpResponseMessage resp = await GetHttpClient(false).SendAsync(msg).ConfigureAwait(false);
 
             if (resp.StatusCode != HttpStatusCode.OK)
                 await HandleErrorResponse(resp);
@@ -64,77 +83,77 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2AuthenticationResponse>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
-        public static async Task<List<B2Bucket>> ListBuckets(Uri apiUri, string authToken, string accountId)
+        public async Task<List<B2Bucket>> ListBuckets(Uri apiUri, string accountId)
         {
-            HttpResponseMessage resp = await InternalRequest(apiUri, authToken, "/b2api/v1/b2_list_buckets", new { accountId });
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_list_buckets", new { accountId });
 
             return JsonConvert.DeserializeObject<B2BucketList>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false)).Buckets;
         }
 
-        public static async Task<B2Bucket> CreateBucket(Uri apiUri, string authToken, string accountId, string name, B2BucketType bucketType)
+        public async Task<B2Bucket> CreateBucket(Uri apiUri, string accountId, string name, B2BucketType bucketType)
         {
-            HttpResponseMessage resp = await InternalRequest(apiUri, authToken, "/b2api/v1/b2_create_bucket", new { accountId, bucketName = name, bucketType = bucketType.GetDescription() });
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_create_bucket", new { accountId, bucketName = name, bucketType = bucketType.GetDescription() });
 
             return JsonConvert.DeserializeObject<B2Bucket>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
-        public static async Task<B2Bucket> DeleteBucket(Uri apiUri, string authToken, string accountId, string bucketId)
+        public async Task<B2Bucket> DeleteBucket(Uri apiUri, string accountId, string bucketId)
         {
-            HttpResponseMessage resp = await InternalRequest(apiUri, authToken, "/b2api/v1/b2_delete_bucket", new { accountId, bucketId });
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_delete_bucket", new { accountId, bucketId });
 
             return JsonConvert.DeserializeObject<B2Bucket>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
-        public static async Task<B2Bucket> UpdateBucket(Uri apiUri, string authToken, string accountId, string bucketId, B2BucketType bucketType)
+        public async Task<B2Bucket> UpdateBucket(Uri apiUri, string accountId, string bucketId, B2BucketType bucketType)
         {
-            HttpResponseMessage resp = await InternalRequest(apiUri, authToken, "/b2api/v1/b2_update_bucket", new { accountId, bucketId, bucketType = bucketType.GetDescription() });
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_update_bucket", new { accountId, bucketId, bucketType = bucketType.GetDescription() });
 
             return JsonConvert.DeserializeObject<B2Bucket>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
-        public static async Task<B2FileBase> HideFile(Uri apiUri, string authToken, string bucketId, string fileName)
+        public async Task<B2FileBase> HideFile(Uri apiUri, string bucketId, string fileName)
         {
-            HttpResponseMessage resp = await InternalRequest(apiUri, authToken, "/b2api/v1/b2_hide_file", new { bucketId, fileName });
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_hide_file", new { bucketId, fileName });
 
             return JsonConvert.DeserializeObject<B2FileBase>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
-        public static async Task<bool> DeleteFile(Uri apiUri, string authToken, string fileName, string fileId)
+        public async Task<bool> DeleteFile(Uri apiUri, string fileName, string fileId)
         {
-            HttpResponseMessage resp = await InternalRequest(apiUri, authToken, "/b2api/v1/b2_delete_file_version", new { fileId, fileName });
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_delete_file_version", new { fileId, fileName });
 
             return resp.StatusCode == HttpStatusCode.OK;
         }
 
-        public static async Task<B2FileInfo> GetFileInfo(Uri apiUri, string authToken, string fileId)
+        public async Task<B2FileInfo> GetFileInfo(Uri apiUri, string fileId)
         {
-            HttpResponseMessage resp = await InternalRequest(apiUri, authToken, "/b2api/v1/b2_get_file_info", new { fileId });
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_get_file_info", new { fileId });
 
             return JsonConvert.DeserializeObject<B2FileInfo>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
-        public static async Task<B2FileListContainer> ListFiles(Uri apiUri, string authToken, string bucketId, string startFileName = null, int maxFileCount = 100)
+        public async Task<B2FileListContainer> ListFiles(Uri apiUri, string bucketId, string startFileName = null, int maxFileCount = 100)
         {
-            HttpResponseMessage resp = await InternalRequest(apiUri, authToken, "/b2api/v1/b2_list_file_names", new { bucketId, startFileName, maxFileCount });
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_list_file_names", new { bucketId, startFileName, maxFileCount });
 
             return JsonConvert.DeserializeObject<B2FileListContainer>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
-        public static async Task<B2FileListContainer> ListFileVersions(Uri apiUri, string authToken, string bucketId, string startFileName = null, string startFileId = null, int maxFileCount = 100)
+        public async Task<B2FileListContainer> ListFileVersions(Uri apiUri, string bucketId, string startFileName = null, string startFileId = null, int maxFileCount = 100)
         {
-            HttpResponseMessage resp = await InternalRequest(apiUri, authToken, "/b2api/v1/b2_list_file_versions", new { bucketId, startFileName, maxFileCount, startFileId });
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_list_file_versions", new { bucketId, startFileName, maxFileCount, startFileId });
 
             return JsonConvert.DeserializeObject<B2FileListContainer>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
-        public static async Task<B2UploadConfiguration> GetUploadUrl(Uri apiUri, string authToken, string bucketId)
+        public async Task<B2UploadConfiguration> GetUploadUrl(Uri apiUri, string bucketId)
         {
-            HttpResponseMessage resp = await InternalRequest(apiUri, authToken, "/b2api/v1/b2_get_upload_url", new { bucketId });
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_get_upload_url", new { bucketId });
 
             return JsonConvert.DeserializeObject<B2UploadConfiguration>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
-        public static async Task<B2FileInfo> UploadFile(Uri uploadUri, string uploadToken, Stream stream, string fileName, string sha1, Dictionary<string, string> fileInfo = null, string contentType = null)
+        public async Task<B2FileInfo> UploadFile(Uri uploadUri, string uploadToken, Stream stream, string fileName, string sha1, Dictionary<string, string> fileInfo = null, string contentType = null)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, uploadUri);
 
@@ -149,7 +168,7 @@ namespace B2Lib
             msg.Content = new StreamContent(stream);
             msg.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType ?? "b2/x-auto");
 
-            HttpResponseMessage resp = await new HttpClient().SendAsync(msg).ConfigureAwait(false);
+            HttpResponseMessage resp = await GetHttpClient(true).SendAsync(msg).ConfigureAwait(false);
 
             if (resp.StatusCode != HttpStatusCode.OK)
                 await HandleErrorResponse(resp);
@@ -157,14 +176,14 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2FileInfo>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
-        public static async Task<B2FileDownloadResult> DownloadFileHead(Uri downloadUri, string fileId, string authToken = null)
+        public async Task<B2FileDownloadResult> DownloadFileHead(Uri downloadUri, string fileId, string overrideAuthToken = null)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Head, new Uri(downloadUri, "/b2api/v1/b2_download_file_by_id?fileId=" + fileId));
 
-            if (!string.IsNullOrEmpty(authToken))
-                msg.Headers.Authorization = new AuthenticationHeaderValue(authToken);
+            if (!string.IsNullOrEmpty(overrideAuthToken) || !string.IsNullOrEmpty(AuthToken))
+                msg.Headers.Authorization = new AuthenticationHeaderValue(overrideAuthToken ?? AuthToken);
 
-            HttpResponseMessage resp = await new HttpClient().SendAsync(msg).ConfigureAwait(false);
+            HttpResponseMessage resp = await GetHttpClient(true).SendAsync(msg).ConfigureAwait(false);
 
             if (resp.StatusCode != HttpStatusCode.OK)
                 await HandleErrorResponse(resp);
@@ -193,14 +212,14 @@ namespace B2Lib
             return res;
         }
 
-        public static async Task<B2DownloadResult> DownloadFileContent(Uri downloadUri, string fileId, string authToken = null)
+        public async Task<B2DownloadResult> DownloadFileContent(Uri downloadUri, string fileId, string overrideAuthToken = null)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Get, new Uri(downloadUri, "/b2api/v1/b2_download_file_by_id?fileId=" + fileId));
 
-            if (!string.IsNullOrEmpty(authToken))
-                msg.Headers.Authorization = new AuthenticationHeaderValue(authToken);
-
-            HttpResponseMessage resp = new HttpClient().SendAsync(msg, HttpCompletionOption.ResponseHeadersRead).Result;
+            if (!string.IsNullOrEmpty(overrideAuthToken) || !string.IsNullOrEmpty(AuthToken))
+                msg.Headers.Authorization = new AuthenticationHeaderValue(overrideAuthToken ?? AuthToken);
+            
+            HttpResponseMessage resp = GetHttpClient(true).SendAsync(msg, HttpCompletionOption.ResponseHeadersRead).Result;
 
             if (resp.StatusCode != HttpStatusCode.OK)
                 HandleErrorResponse(resp).Wait();
@@ -230,7 +249,7 @@ namespace B2Lib
 
             result.Info = info;
             result.Stream = await resp.Content.ReadAsStreamAsync();
-            
+
             return result;
         }
     }

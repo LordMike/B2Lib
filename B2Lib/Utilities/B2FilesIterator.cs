@@ -7,17 +7,17 @@ namespace B2Lib.Utilities
 {
     public class B2FilesIterator : IEnumerable<B2FileWithSize>
     {
+        private readonly B2Communicator _communicator;
         private readonly Uri _apiUri;
-        private readonly string _authToken;
         private readonly string _bucketId;
         private readonly string _startName;
 
         public int PageSize { get; set; } = 100;
 
-        public B2FilesIterator(Uri apiUri, string authToken, string bucketId, string startName)
+        public B2FilesIterator(B2Communicator communicator, Uri apiUri, string bucketId, string startName)
         {
+            _communicator = communicator;
             _apiUri = apiUri;
-            _authToken = authToken;
             _bucketId = bucketId;
             _startName = startName;
         }
@@ -28,7 +28,7 @@ namespace B2Lib.Utilities
 
             while (true)
             {
-                B2FileListContainer result = B2Communicator.ListFiles(_apiUri, _authToken, _bucketId, currentStart, PageSize).Result;
+                B2FileListContainer result = _communicator.ListFiles(_apiUri, _bucketId, currentStart, PageSize).Result;
 
                 currentStart = result.NextFileName;
 

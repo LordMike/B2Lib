@@ -7,18 +7,18 @@ namespace B2Lib.Utilities
 {
     public class B2FileVersionsIterator : IEnumerable<B2FileWithSize>
     {
+        private readonly B2Communicator _communicator;
         private readonly Uri _apiUri;
-        private readonly string _authToken;
         private readonly string _bucketId;
         private readonly string _startName;
         private readonly string _startId;
 
         public int PageSize { get; set; } = 1000;
 
-        public B2FileVersionsIterator(Uri apiUri, string authToken, string bucketId, string startName, string startId)
+        public B2FileVersionsIterator(B2Communicator communicator, Uri apiUri, string bucketId, string startName, string startId)
         {
+            _communicator = communicator;
             _apiUri = apiUri;
-            _authToken = authToken;
             _bucketId = bucketId;
             _startName = startName;
             _startId = startId;
@@ -31,7 +31,7 @@ namespace B2Lib.Utilities
 
             while (true)
             {
-                B2FileListContainer result = B2Communicator.ListFileVersions(_apiUri, _authToken, _bucketId, currentStart, currentStartId, PageSize).Result;
+                B2FileListContainer result = _communicator.ListFileVersions(_apiUri, _bucketId, currentStart, currentStartId, PageSize).Result;
 
                 currentStart = result.NextFileName;
                 currentStartId = result.NextFileId;
