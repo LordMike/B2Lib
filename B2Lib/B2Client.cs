@@ -17,6 +17,7 @@ namespace B2Lib
         public string AuthorizationToken { get; private set; }
         public string AccountId { get; private set; }
 
+        private ConcurrentDictionary<string, ConcurrentBag<B2UploadConfiguration>> _bucketUploadUrls;
         private B2BucketCacher _bucketCache;
 
         public Uri ApiUrl { get; private set; }
@@ -24,6 +25,7 @@ namespace B2Lib
 
         public B2Client()
         {
+            _bucketUploadUrls = new ConcurrentDictionary<string, ConcurrentBag<B2UploadConfiguration>>();
             _bucketCache = new B2BucketCacher();
         }
 
@@ -268,45 +270,56 @@ namespace B2Lib
 
         public async Task<B2FileInfo> UploadFileAsync(string bucketId, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
         {
-            B2BucketCache uploadConfig = await Task.Run(() => FetchUploadUrl(bucketId));
+            B2UploadConfiguration uploadConfig = await Task.Run(() => FetchUploadConfig(bucketId));
 
-            using (FileStream fs = File.OpenRead(file.FullName))
-            using (SHA1CryptoServiceProvider sha1 = new SHA1CryptoServiceProvider())
+            try
             {
-                string hash = BitConverter.ToString(sha1.ComputeHash(fs)).Replace("-", "");
+                using (FileStream fs = File.OpenRead(file.FullName))
+                using (SHA1CryptoServiceProvider sha1 = new SHA1CryptoServiceProvider())
+                {
+                    string hash = BitConverter.ToString(sha1.ComputeHash(fs)).Replace("-", "");
 
-                fs.Seek(0, SeekOrigin.Begin);
+                    fs.Seek(0, SeekOrigin.Begin);
 
-                B2FileInfo res = await B2Communicator.UploadFile(uploadConfig.UploadUri, uploadConfig.UploadAuthorizationToken, fs, fileName, hash, fileInfo, contentType);
+                    B2FileInfo res = await B2Communicator.UploadFile(uploadConfig.UploadUrl, uploadConfig.AuthorizationToken, fs, fileName, hash, fileInfo, contentType);
 
-                return res;
+                    return res;
+                }
+            }
+            finally
+            {
+                ReturnUploadConfig(bucketId, uploadConfig);
             }
         }
 
-        private B2BucketCache FetchUploadUrl(string bucketId)
+        private void ReturnUploadConfig(string bucketId, B2UploadConfiguration config)
         {
-            object lockObj = KeyLocker.GetLockObject(bucketId);
+            ConcurrentBag<B2UploadConfiguration> bag = _bucketUploadUrls.GetOrAdd(bucketId, s => new ConcurrentBag<B2UploadConfiguration>());
 
-            lock (lockObj)
+            bag.Add(config);
+        }
+
+        private B2UploadConfiguration FetchUploadConfig(string bucketId)
+        {
+            ConcurrentBag<B2UploadConfiguration> bag = _bucketUploadUrls.GetOrAdd(bucketId, s => new ConcurrentBag<B2UploadConfiguration>());
+
+            B2UploadConfiguration config;
+            if (bag.TryTake(out config))
+                return config;
+
+            // Create new config
+            B2UploadConfiguration res;
+            try
             {
-                B2BucketCache item = _bucketCache.GetById(bucketId);
-
-                if (item != null && item.ReadyForUpload)
-                    return item;
-
-                B2UploadConfiguration res;
-                try
-                {
-                    res = B2Communicator.GetUploadUrl(ApiUrl, AuthorizationToken, bucketId).Result;
-                }
-                catch (AggregateException ex)
-                {
-                    // Re-throw the inner exception
-                    throw ex.InnerException;
-                }
-
-                return _bucketCache.RecordBucket(res);
+                res = B2Communicator.GetUploadUrl(ApiUrl, AuthorizationToken, bucketId).Result;
             }
+            catch (AggregateException ex)
+            {
+                // Re-throw the inner exception
+                throw ex.InnerException;
+            }
+
+            return res;
         }
 
         public async Task<B2FileDownloadResult> DownloadFileHeadAsync(B2FileBase file)

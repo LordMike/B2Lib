@@ -62,18 +62,7 @@ namespace B2Lib.Utilities
 
             return item;
         }
-
-        public B2BucketCache RecordBucket(B2UploadConfiguration config)
-        {
-            B2BucketCache item = GetById(config.BucketId, true);
-
-            item.UploadAuthorizationToken = config.AuthorizationToken;
-            item.BucketId = config.BucketId;
-            item.UploadUri = config.UploadUrl;
-
-            return item;
-        }
-
+        
         public void RemoveBucket(B2Bucket bucket)
         {
             lock (_cache)
