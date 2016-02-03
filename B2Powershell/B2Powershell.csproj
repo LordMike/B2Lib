@@ -53,6 +53,7 @@
     <Compile Include="NewBucketCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RemoveBucketCommand.cs" />
+    <Compile Include="RemoveFilesCommand.cs" />
     <Compile Include="SetBucketCommand.cs" />
   </ItemGroup>
   <ItemGroup>
