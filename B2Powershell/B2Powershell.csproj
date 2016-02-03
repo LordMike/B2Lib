@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="B2CommandWithSaveState.cs" />
     <Compile Include="GetAuthorizationCommand.cs" />
     <Compile Include="ExportStateCommand.cs" />
     <Compile Include="GetBucketCommand.cs" />
