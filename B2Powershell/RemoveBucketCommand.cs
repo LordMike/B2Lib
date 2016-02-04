@@ -15,8 +15,6 @@ namespace B2Powershell
         
         protected override void ProcessRecordInternal()
         {
-            base.ProcessRecord();
-
             if (BucketNames != null)
             {
                 foreach (string bucketName in BucketNames)
