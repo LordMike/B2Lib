@@ -49,7 +49,6 @@
     <Compile Include="GetAuthorizationCommand.cs" />
     <Compile Include="ExportStateCommand.cs" />
     <Compile Include="GetBucketCommand.cs" />
-    <Compile Include="GetBucketsCommand.cs" />
     <Compile Include="GetFilesCommand.cs" />
     <Compile Include="ImportStateCommand.cs" />
     <Compile Include="NewBucketCommand.cs" />
