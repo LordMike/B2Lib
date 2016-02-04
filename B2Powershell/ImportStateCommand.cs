@@ -1,5 +1,6 @@
 using System.Management.Automation;
 using B2Lib;
+using B2Lib.Objects;
 
 namespace B2Powershell
 {
@@ -14,7 +15,9 @@ namespace B2Powershell
             B2Client client = new B2Client();
             client.LoadState(File);
 
-            WriteObject(client.SaveState());
+            B2SaveState state = client.SaveState();
+            this.SaveState(state);
+            WriteObject(state);
         }
     }
 }
