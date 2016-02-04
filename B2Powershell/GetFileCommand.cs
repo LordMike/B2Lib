@@ -7,8 +7,8 @@ using B2Lib.Utilities;
 
 namespace B2Powershell
 {
-    [Cmdlet(VerbsCommon.Get, "B2Files")]
-    public class GetFilesCommand : B2CommandWithSaveState
+    [Cmdlet(VerbsCommon.Get, "B2File")]
+    public class GetFileCommand : B2CommandWithSaveState
     {
         [Parameter(ParameterSetName = "by_name", Mandatory = true, Position = 1)]
         public string BucketName { get; set; }

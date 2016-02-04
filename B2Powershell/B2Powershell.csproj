@@ -49,7 +49,7 @@
     <Compile Include="GetAuthorizationCommand.cs" />
     <Compile Include="ExportStateCommand.cs" />
     <Compile Include="GetBucketCommand.cs" />
-    <Compile Include="GetFilesCommand.cs" />
+    <Compile Include="GetFileCommand.cs" />
     <Compile Include="ImportStateCommand.cs" />
     <Compile Include="NewBucketCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
