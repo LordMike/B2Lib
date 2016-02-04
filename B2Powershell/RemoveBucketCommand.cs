@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Management.Automation;
 using B2Lib.Objects;
 using B2Lib.SyncExtensions;
@@ -12,10 +13,10 @@ namespace B2Powershell
 
         [Parameter(ParameterSetName = "by_bucket", ValueFromPipeline = true, Mandatory = true, Position = 1)]
         public B2Bucket[] Buckets { get; set; }
-        
+
         protected override void ProcessRecordInternal()
         {
-            if (BucketNames != null)
+            if (ParameterSetName == "by_name")
             {
                 foreach (string bucketName in BucketNames)
                 {
@@ -25,8 +26,7 @@ namespace B2Powershell
                     WriteObject(res);
                 }
             }
-
-            if (Buckets != null)
+            else if (ParameterSetName == "by_bucket")
             {
                 foreach (B2Bucket bucket in Buckets)
                 {
@@ -34,6 +34,10 @@ namespace B2Powershell
 
                     WriteObject(res);
                 }
+            }
+            else
+            {
+                throw new PSArgumentException("Invalid set of values provided");
             }
         }
     }

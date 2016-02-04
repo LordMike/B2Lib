@@ -22,15 +22,19 @@ namespace B2Powershell
         protected override void ProcessRecordInternal()
         {
             B2Bucket bucket;
-            if (!string.IsNullOrEmpty(BucketName))
-            {
-                bucket = Client.GetBucketByName(BucketName);
-            }
-            else
-            {
-                bucket = Bucket;
-            }
 
+            switch (ParameterSetName)
+            {
+                case "by_name":
+                    bucket = Client.GetBucketByName(BucketName);
+                    break;
+                case "by_bucket":
+                    bucket = Bucket;
+                    break;
+                default:
+                    throw new PSArgumentException("Invalid set of values provided");
+            }
+            
             B2FilesIterator files = Client.ListFiles(bucket);
             IEnumerable<B2FileBase> iterator = files;
 

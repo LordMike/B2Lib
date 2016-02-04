@@ -15,18 +15,21 @@ namespace B2Powershell
 
         protected override void ProcessRecordInternal()
         {
-            if (!string.IsNullOrEmpty(Name))
-            {
-                B2Bucket res = Client.GetBucketByName(Name);
+            B2Bucket res;
 
-                WriteObject(res);
-            }
-            else if (!string.IsNullOrEmpty(Id))
+            switch (ParameterSetName)
             {
-                B2Bucket res = Client.GetBucketById(Id);
-
-                WriteObject(res);
+                case "by_name":
+                    res = Client.GetBucketByName(Name);
+                    break;
+                case "by_id":
+                    res = Client.GetBucketById(Id);
+                    break;
+                default:
+                    throw new PSArgumentException("Invalid set of values provided");
             }
+
+            WriteObject(res);
         }
     }
 }

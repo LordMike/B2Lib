@@ -19,7 +19,7 @@ namespace B2Powershell
         
         protected override void ProcessRecordInternal()
         {
-            if (BucketNames != null)
+            if (ParameterSetName == "by_name")
             {
                 foreach (string bucketName in BucketNames)
                 {
@@ -29,8 +29,7 @@ namespace B2Powershell
                     WriteObject(res);
                 }
             }
-
-            if (Buckets != null)
+            else if (ParameterSetName == "by_bucket")
             {
                 foreach (B2Bucket bucket in Buckets)
                 {
@@ -38,6 +37,10 @@ namespace B2Powershell
 
                     WriteObject(res);
                 }
+            }
+            else
+            {
+                throw new PSArgumentException("Invalid set of values provided");
             }
         }
     }
