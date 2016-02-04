@@ -34,7 +34,7 @@ namespace B2Powershell
                 default:
                     throw new PSArgumentException("Invalid set of values provided");
             }
-            
+
             B2FilesIterator files = Client.ListFiles(bucket);
             IEnumerable<B2FileBase> iterator = files;
 

@@ -4,8 +4,8 @@ using B2Lib.SyncExtensions;
 
 namespace B2Powershell
 {
-    [Cmdlet(VerbsCommon.Remove, "B2Files")]
-    public class RemoveFilesCommand : B2CommandWithSaveState
+    [Cmdlet(VerbsCommon.Remove, "B2File")]
+    public class RemoveFileCommand : B2CommandWithSaveState
     {
         [Parameter(Mandatory = true, ValueFromPipeline = true, Position = 1)]
         public B2FileBase[] Files { get; set; }
