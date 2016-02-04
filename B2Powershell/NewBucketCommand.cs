@@ -8,7 +8,7 @@ namespace B2Powershell
     [Cmdlet(VerbsCommon.New, "B2Bucket")]
     public class NewBucketCommand : B2CommandWithSaveState
     {
-        [Parameter(Mandatory = true, Position = 1)]
+        [Parameter(Mandatory = true, Position = 0)]
         public string Name { get; set; }
 
         [Parameter(Mandatory = true)]

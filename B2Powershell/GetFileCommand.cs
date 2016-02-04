@@ -10,10 +10,10 @@ namespace B2Powershell
     [Cmdlet(VerbsCommon.Get, "B2File")]
     public class GetFileCommand : B2CommandWithSaveState
     {
-        [Parameter(ParameterSetName = "by_name", Mandatory = true, Position = 1)]
+        [Parameter(ParameterSetName = "by_name", Mandatory = true, Position = 0)]
         public string BucketName { get; set; }
 
-        [Parameter(ParameterSetName = "by_bucket", Mandatory = true, ValueFromPipeline = true, Position = 1)]
+        [Parameter(ParameterSetName = "by_bucket", Mandatory = true, ValueFromPipeline = true, Position = 0)]
         public B2Bucket Bucket { get; set; }
 
         [Parameter]

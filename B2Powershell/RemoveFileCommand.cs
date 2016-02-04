@@ -7,7 +7,7 @@ namespace B2Powershell
     [Cmdlet(VerbsCommon.Remove, "B2File")]
     public class RemoveFileCommand : B2CommandWithSaveState
     {
-        [Parameter(Mandatory = true, ValueFromPipeline = true, Position = 1)]
+        [Parameter(Mandatory = true, ValueFromPipeline = true, Position = 0)]
         public B2FileBase[] Files { get; set; }
 
         protected override void ProcessRecordInternal()

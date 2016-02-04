@@ -6,7 +6,7 @@ namespace B2Powershell
 {
     public abstract class B2CommandWithSaveState : PSCmdlet
     {
-        [Parameter(Position = 0)]
+        [Parameter]
         public B2SaveState State
         {
             get
