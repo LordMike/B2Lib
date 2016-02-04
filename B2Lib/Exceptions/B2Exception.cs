@@ -7,7 +7,10 @@ namespace B2Lib.Exceptions
     {
         public HttpStatusCode? HttpStatusCode { get; set; }
 
-        public B2Exception(string message) : base(message)
+        public string ErrorCode { get; set; }
+
+        public B2Exception(string message) 
+            : base(message)
         {
 
         }

@@ -42,7 +42,8 @@ namespace B2Lib
 
             throw new B2Exception(error.Message)
             {
-                HttpStatusCode = resp.StatusCode
+                HttpStatusCode = resp.StatusCode,
+                ErrorCode = error.Code
             };
         }
 
