@@ -6,10 +6,28 @@ namespace B2Powershell
 {
     public abstract class B2CommandWithSaveState : PSCmdlet
     {
-        [Parameter(Mandatory = true, Position = 0)]
-        public B2SaveState State { get; set; }
+        [Parameter(Position = 0)]
+        public B2SaveState State
+        {
+            get
+            {
+                if (_state == null)
+                {
+                    _state = this.GetState();
+
+                    WriteVerbose("Fetching state from current session, new state: " + _state);
+                }
+
+                return _state;
+            }
+            set
+            {
+                _state = value;
+            }
+        }
 
         protected B2Client Client;
+        private B2SaveState _state;
 
         protected override void ProcessRecord()
         {
@@ -19,7 +37,7 @@ namespace B2Powershell
 
             Client = new B2Client();
             Client.LoadState(State);
-            
+
             WriteVerbose("Running ProcessRecordInternal()");
 
             ProcessRecordInternal();
