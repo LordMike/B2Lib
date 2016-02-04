@@ -354,12 +354,12 @@ namespace B2Lib
             return await _communicator.DownloadFileHead(DownloadUrl, fileId, AuthorizationToken);
         }
 
-        public async Task<B2DownloadResult> DownloadFileContent(B2FileBase file)
+        public async Task<B2DownloadResult> DownloadFileContentAsync(B2FileBase file)
         {
-            return await DownloadFileContent(file.FileId);
+            return await DownloadFileContentAsync(file.FileId);
         }
 
-        public async Task<B2DownloadResult> DownloadFileContent(string fileId)
+        public async Task<B2DownloadResult> DownloadFileContentAsync(string fileId)
         {
             ThrowExceptionIfNotAuthorized();
 

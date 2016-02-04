@@ -165,12 +165,12 @@ namespace B2Lib.SyncExtensions
         
         public static B2DownloadResult DownloadFileContent(this B2Client client, B2FileBase file)
         {
-            return AsyncRunHelper(() => client.DownloadFileContent(file));
+            return AsyncRunHelper(() => client.DownloadFileContentAsync(file));
         }
 
         public static B2DownloadResult DownloadFileContent(this B2Client client, string fileId)
         {
-            return AsyncRunHelper(() => client.DownloadFileContent(fileId));
+            return AsyncRunHelper(() => client.DownloadFileContentAsync(fileId));
         }
     }
 }
