@@ -36,6 +36,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -48,6 +49,7 @@
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
     <Compile Include="Objects\B2DownloadResult.cs" />
+    <Compile Include="Objects\B2Uploader.cs" />
     <Compile Include="Utilities\B2BucketCacher.cs" />
     <Compile Include="B2Client.cs" />
     <Compile Include="Exceptions\B2AuthenticationException.cs" />

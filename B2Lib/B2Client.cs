@@ -283,12 +283,12 @@ namespace B2Lib
             return new B2FileVersionsIterator(_communicator, ApiUrl, bucketId, startFileName, startFileId);
         }
 
-        public async Task<B2FileInfo> UploadFileAsync(B2Bucket bucket, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
+        public async Task<B2FileInfo> UploadFileAsync(B2Bucket bucket, FileInfo file, string fileName, string contentType = null)
         {
-            return await UploadFileAsync(bucket.BucketId, file, fileName, fileInfo, contentType);
+            return await UploadFileAsync(bucket.BucketId, file, fileName, contentType);
         }
 
-        public async Task<B2FileInfo> UploadFileAsync(string bucketId, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
+        public async Task<B2FileInfo> UploadFileAsync(string bucketId, FileInfo file, string fileName, string contentType = null)
         {
             B2UploadConfiguration uploadConfig = await Task.Run(() => FetchUploadConfig(bucketId));
 
@@ -301,7 +301,7 @@ namespace B2Lib
 
                     fs.Seek(0, SeekOrigin.Begin);
 
-                    B2FileInfo res = await _communicator.UploadFile(uploadConfig.UploadUrl, uploadConfig.AuthorizationToken, fs, fileName, hash, fileInfo, contentType);
+                    B2FileInfo res = await _communicator.UploadFile(uploadConfig.UploadUrl, uploadConfig.AuthorizationToken, fs, fileName, hash, contentType);
 
                     return res;
                 }
@@ -312,14 +312,38 @@ namespace B2Lib
             }
         }
 
-        private void ReturnUploadConfig(string bucketId, B2UploadConfiguration config)
+        public async Task<B2FileInfo> UploadFileAsync(B2Uploader uploader)
+        {
+            B2UploadConfiguration uploadConfig = await Task.Run(() => FetchUploadConfig(uploader.BucketId));
+
+            try
+            {
+                return await _communicator.UploadFile(uploadConfig.UploadUrl, uploadConfig.AuthorizationToken, uploader);
+            }
+            finally
+            {
+                ReturnUploadConfig(uploader.BucketId, uploadConfig);
+            }
+        }
+
+        public B2Uploader GetUploader(B2Bucket bucket)
+        {
+            return GetUploader(bucket.BucketId);
+        }
+
+        public B2Uploader GetUploader(string bucketId)
+        {
+            return new B2Uploader(this, bucketId);
+        }
+
+        internal void ReturnUploadConfig(string bucketId, B2UploadConfiguration config)
         {
             ConcurrentBag<B2UploadConfiguration> bag = _bucketUploadUrls.GetOrAdd(bucketId, s => new ConcurrentBag<B2UploadConfiguration>());
 
             bag.Add(config);
         }
 
-        private B2UploadConfiguration FetchUploadConfig(string bucketId)
+        internal B2UploadConfiguration FetchUploadConfig(string bucketId)
         {
             ConcurrentBag<B2UploadConfiguration> bag = _bucketUploadUrls.GetOrAdd(bucketId, s => new ConcurrentBag<B2UploadConfiguration>());
 

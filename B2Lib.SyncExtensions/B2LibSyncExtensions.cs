@@ -143,14 +143,19 @@ namespace B2Lib.SyncExtensions
             return AsyncRunHelper(() => client.DeleteFileAsync(fileName, fileId));
         }
 
-        public static B2FileInfo UploadFile(this B2Client client, B2Bucket bucket, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
+        public static B2FileInfo UploadFile(this B2Client client, B2Bucket bucket, FileInfo file, string fileName,string contentType = null)
         {
-            return AsyncRunHelper(() => client.UploadFileAsync(bucket, file, fileName, fileInfo, contentType));
+            return AsyncRunHelper(() => client.UploadFileAsync(bucket, file, fileName, contentType));
         }
 
-        public static B2FileInfo UploadFile(this B2Client client, string bucketId, FileInfo file, string fileName, Dictionary<string, string> fileInfo = null, string contentType = null)
+        public static B2FileInfo UploadFile(this B2Client client, string bucketId, FileInfo file, string fileName, string contentType = null)
         {
-            return AsyncRunHelper(() => client.UploadFileAsync(bucketId, file, fileName, fileInfo, contentType));
+            return AsyncRunHelper(() => client.UploadFileAsync(bucketId, file, fileName, contentType));
+        }
+
+        public static B2FileInfo UploadFile(this B2Client client, B2Uploader uploader)
+        {
+            return AsyncRunHelper(() => client.UploadFileAsync(uploader));
         }
 
         public static B2FileDownloadResult DownloadFileHead(this B2Client client, B2FileBase file)

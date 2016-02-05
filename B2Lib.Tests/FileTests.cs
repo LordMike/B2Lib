@@ -236,6 +236,49 @@ namespace B2Lib.Tests
             }
         }
 
+        [TestMethod]
+        public void FileUploader()
+        {
+            File.WriteAllText(_tmpPath, "Testworld,123");
+
+            // Upload it 
+            B2FileInfo file;
+            using (FileStream fs = File.OpenRead(_tmpPath))
+            {
+                B2Uploader uploader = _client.GetUploader(_bucket);
+
+                uploader.SetFileName("test");
+                uploader.SetInput(fs);
+                
+                uploader.CalculateSha1FromInput();
+
+                file = _client.UploadFile(uploader);
+                TestFileContents(file);
+            }
+            
+            // Fetch info
+            B2FileInfo info = _client.GetFileInfo(file.FileId);
+            TestFileContents(info);
+
+            Assert.AreEqual(file.FileId, info.FileId);
+            Assert.AreEqual(file.ContentLength, info.ContentLength);
+
+            // Delete file
+            _client.DeleteFile(info);
+
+            // Ensure info is blank
+            try
+            {
+                info = _client.GetFileInfo(file.FileId);
+
+                Assert.Fail();
+            }
+            catch (B2Exception ex)
+            {
+                Assert.AreEqual(HttpStatusCode.NotFound, ex.HttpStatusCode);
+            }
+        }
+
         private void TestFileContents(B2FileInfo file)
         {
             Assert.IsNotNull(file);

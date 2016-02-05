@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Handlers;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,9 +32,13 @@ namespace B2Lib
             TimeoutData = TimeSpan.FromMinutes(30);
         }
 
-        private HttpClient GetHttpClient(bool isDataRequest)
+        private HttpClient GetHttpClient(bool isDataRequest, HttpMessageHandler handler = null)
         {
-            return new HttpClient { Timeout = isDataRequest ? TimeoutData : TimeoutMeta };
+            HttpClient res = handler != null ? new HttpClient(handler) : new HttpClient();
+
+            res.Timeout = isDataRequest ? TimeoutData : TimeoutMeta;
+
+            return res;
         }
 
         private async Task HandleErrorResponse(HttpResponseMessage resp)
@@ -154,17 +159,74 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2UploadConfiguration>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
-        public async Task<B2FileInfo> UploadFile(Uri uploadUri, string uploadToken, Stream stream, string fileName, string sha1, Dictionary<string, string> fileInfo = null, string contentType = null)
+        public async Task<B2FileInfo> UploadFile(Uri uploadUri, string uploadToken, B2Uploader uploader)
+        {
+            // Pre-checks
+            if (uploader.InputStream == null)
+                throw new ArgumentNullException("Stream must be set");
+
+            if (string.IsNullOrEmpty(uploader.Sha1) || uploader.Sha1.Length != 40)
+                throw new ArgumentException("SHA1 must be set or computed");
+
+            if (string.IsNullOrEmpty(uploader.FileName))
+                throw new ArgumentException("Filename must be set");
+
+            if (string.IsNullOrEmpty(uploader.ContentType))
+                throw new ArgumentException("ContentType must be set");
+
+            // Prepare
+            HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, uploadUri);
+
+            msg.Headers.Authorization = new AuthenticationHeaderValue(uploadToken);
+            msg.Headers.Add("X-Bz-File-Name", WebUtility.UrlEncode(uploader.FileName));
+            msg.Headers.Add("X-Bz-Content-Sha1", uploader.Sha1);
+
+            // Upload
+            foreach (KeyValuePair<string, string> info in uploader.Infoes)
+                msg.Headers.Add("X-Bz-Info-" + info.Key, WebUtility.UrlEncode(info.Value));
+
+            msg.Content = new StreamContent(uploader.InputStream);
+            msg.Content.Headers.ContentType = new MediaTypeHeaderValue(uploader.ContentType);
+
+            ProgressMessageHandler progressMessageHandler = new ProgressMessageHandler(new HttpClientHandler());
+
+            EventHandler<HttpProgressEventArgs> progress = null;
+            if (uploader.NotifyDelegate != null)
+            {
+                progress = (sender, args) =>
+                {
+                    uploader.NotifyDelegate(args.TotalBytes ?? 0, args.TotalBytes ?? 0);
+                };
+                
+                progressMessageHandler.HttpSendProgress += progress;
+            }
+            
+            try
+            {
+                using (HttpClient http = GetHttpClient(true, progressMessageHandler))
+                {
+                    HttpResponseMessage resp = await http.SendAsync(msg).ConfigureAwait(false);
+
+                    if (resp.StatusCode != HttpStatusCode.OK)
+                        await HandleErrorResponse(resp);
+
+                    return JsonConvert.DeserializeObject<B2FileInfo>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+                }
+            }
+            finally
+            {
+                if (progress != null)
+                    progressMessageHandler.HttpSendProgress -= progress;
+            }
+        }
+
+        public async Task<B2FileInfo> UploadFile(Uri uploadUri, string uploadToken, Stream stream, string fileName, string sha1, string contentType = null)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, uploadUri);
 
             msg.Headers.Authorization = new AuthenticationHeaderValue(uploadToken);
             msg.Headers.Add("X-Bz-File-Name", WebUtility.UrlEncode(fileName));
             msg.Headers.Add("X-Bz-Content-Sha1", sha1);
-
-            if (fileInfo != null)
-                foreach (KeyValuePair<string, string> pair in fileInfo)
-                    msg.Headers.Add("X-Bz-Info-" + pair.Key, WebUtility.UrlEncode(pair.Value));
 
             msg.Content = new StreamContent(stream);
             msg.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType ?? "b2/x-auto");
@@ -219,7 +281,7 @@ namespace B2Lib
 
             if (!string.IsNullOrEmpty(overrideAuthToken) || !string.IsNullOrEmpty(AuthToken))
                 msg.Headers.Authorization = new AuthenticationHeaderValue(overrideAuthToken ?? AuthToken);
-            
+
             HttpResponseMessage resp = GetHttpClient(true).SendAsync(msg, HttpCompletionOption.ResponseHeadersRead).Result;
 
             if (resp.StatusCode != HttpStatusCode.OK)

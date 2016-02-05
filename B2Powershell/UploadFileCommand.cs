@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Management.Automation;
+using System.Threading;
+using System.Threading.Tasks;
 using B2Lib.Objects;
 using B2Lib.SyncExtensions;
 
@@ -63,21 +65,33 @@ namespace B2Powershell
                 WriteProgress(progressRecord);
 
                 // Upload file
-                Client.UploadFile(Bucket, spec.LocalFile, spec.LocalFile.Name);
+                using (FileStream fs = spec.LocalFile.OpenRead())
+                {
+                    B2Uploader uploader = Client.GetUploader(Bucket);
 
-                //using (FileStream fs = File.OpenWrite(spec.LocalFile))
-                //using (B2DownloadResult res = Client.DownloadFileContent(spec.File))
-                //{
-                //    int read;
-                //    byte[] buffer = new byte[4096];
-                //    while ((read = res.Stream.Read(buffer, 0, buffer.Length)) > 0)
-                //    {
-                //        fs.Write(buffer, 0, read);
+                    uploader.SetInput(fs);
+                    uploader.CalculateSha1FromInput();
+                    uploader.SetFileName(spec.LocalFile.Name);
 
-                //        progressRecord.PercentComplete = (int)(fs.Position * 100f / res.Info.ContentLength);
-                //        WriteProgress(progressRecord);
-                //    }
-                //}
+                    uploader.SetNotificationAction((position, length) =>
+                    {
+                        if (length == 0)
+                            // Hack to avoid DivideByZero
+                            length = 1;
+
+                        progressRecord.PercentComplete = (int)(position * 100f / length);
+                    });
+
+                    Task<B2FileInfo> res = Client.UploadFileAsync(uploader);
+                    Task[] tasks = { res };
+
+                    while (!Task.WaitAll(tasks, 100))
+                    {
+                        WriteProgress(progressRecord);
+                    }
+
+                    WriteObject(res.Result);
+                }
             }
         }
 
