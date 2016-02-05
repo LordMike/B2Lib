@@ -57,6 +57,7 @@
     <Compile Include="RemoveBucketCommand.cs" />
     <Compile Include="RemoveFileCommand.cs" />
     <Compile Include="SetBucketCommand.cs" />
+    <Compile Include="UploadFileCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
