@@ -19,6 +19,7 @@ namespace B2Lib
 {
     public class B2Communicator
     {
+        public const string DefaultContentType = "b2/x-auto";
         private static readonly Uri UriAuth = new Uri("https://api.backblaze.com/b2api/v1/b2_authorize_account");
 
         public TimeSpan TimeoutMeta { get; set; }
@@ -314,6 +315,28 @@ namespace B2Lib
             result.Stream = await resp.Content.ReadAsStreamAsync();
 
             return result;
+        }
+
+        public async Task<B2LargeFileUploader> StartLargeFile(Uri apiUri, string bucketId, string fileName, string contentType = null, Dictionary<string,string> info = null)
+        {
+            // Pre-checks
+            if (string.IsNullOrEmpty(fileName))
+                throw new ArgumentException("Filename must be set");
+
+            // Prepare
+            var body = new
+            {
+                bucketId,
+                fileName,
+                contentType= contentType ?? DefaultContentType,
+                fileInfo = info
+            };
+            
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_start_large_file", body);
+
+            B2LargeFileResponse responseObject = JsonConvert.DeserializeObject<B2LargeFileResponse>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+
+            return new B2LargeFileUploader(responseObject);
         }
     }
 }

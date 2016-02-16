@@ -28,6 +28,13 @@ namespace TestApplication
                 client.SaveState("state");
             }
 
+            // TODO: This is a test for a not-yet-implemented-thing
+            B2Communicator comm = new B2Communicator();
+            comm.AuthToken = client.AuthorizationToken;
+            B2LargeFileUploader rep = comm.StartLargeFile(client.ApiUrl, "9b4586f45986e47c54220610", "MyLargeFile",
+                info: new Dictionary<string, string> { { "test", "1234" } }).Result;
+
+            
             string name = "test-123";
             B2Bucket bck = client.GetBucketByName(name);
             if (bck == null)
