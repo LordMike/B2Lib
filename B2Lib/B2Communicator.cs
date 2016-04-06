@@ -19,6 +19,8 @@ namespace B2Lib
 {
     public class B2Communicator
     {
+        public delegate void NotifyProgress(long position, long length);
+
         private static readonly Uri UriAuth = new Uri("https://api.backblaze.com/b2api/v1/b2_authorize_account");
 
         public TimeSpan TimeoutMeta { get; set; }
@@ -220,43 +222,46 @@ namespace B2Lib
         /// 
         /// https://www.backblaze.com/b2/docs/b2_upload_file.html
         /// </summary>
-        public async Task<B2FileInfo> UploadFile(Uri uploadUri, string uploadToken, B2Uploader uploader)
+        public async Task<B2FileInfo> UploadFile(Uri uploadUri, string uploadToken, Stream inputStream, string sha1, string fileName, string contentType, Dictionary<string, string> fileInfo, NotifyProgress notifyDelegate)
         {
             // Pre-checks
-            if (uploader.InputStream == null)
+            if (inputStream == null)
                 throw new ArgumentNullException("Stream must be set");
 
-            if (string.IsNullOrEmpty(uploader.Sha1) || uploader.Sha1.Length != 40)
+            if (string.IsNullOrEmpty(sha1) || sha1.Length != 40)
                 throw new ArgumentException("SHA1 must be set or computed");
 
-            if (string.IsNullOrEmpty(uploader.FileName))
+            if (string.IsNullOrEmpty(fileName))
                 throw new ArgumentException("Filename must be set");
 
-            if (string.IsNullOrEmpty(uploader.ContentType))
+            if (string.IsNullOrEmpty(contentType))
                 throw new ArgumentException("ContentType must be set");
 
             // Prepare
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, uploadUri);
 
             msg.Headers.Authorization = new AuthenticationHeaderValue(uploadToken);
-            msg.Headers.Add("X-Bz-File-Name", WebUtility.UrlEncode(uploader.FileName));
-            msg.Headers.Add("X-Bz-Content-Sha1", uploader.Sha1);
+            msg.Headers.Add("X-Bz-File-Name", WebUtility.UrlEncode(fileName));
+            msg.Headers.Add("X-Bz-Content-Sha1", sha1);
 
             // Upload
-            foreach (KeyValuePair<string, string> info in uploader.Infoes)
-                msg.Headers.Add("X-Bz-Info-" + info.Key, WebUtility.UrlEncode(info.Value));
+            if (fileInfo != null)
+            {
+                foreach (KeyValuePair<string, string> info in fileInfo)
+                    msg.Headers.Add("X-Bz-Info-" + info.Key, WebUtility.UrlEncode(info.Value));
+            }
 
-            msg.Content = new StreamContent(uploader.InputStream);
-            msg.Content.Headers.ContentType = new MediaTypeHeaderValue(uploader.ContentType);
+            msg.Content = new StreamContent(inputStream);
+            msg.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
             ProgressMessageHandler progressMessageHandler = new ProgressMessageHandler(new HttpClientHandler());
 
             EventHandler<HttpProgressEventArgs> progress = null;
-            if (uploader.NotifyDelegate != null)
+            if (notifyDelegate != null)
             {
                 progress = (sender, args) =>
                 {
-                    uploader.NotifyDelegate(args.TotalBytes ?? 0, args.TotalBytes ?? 0);
+                    notifyDelegate(args.TotalBytes ?? 0, args.TotalBytes ?? 0);
                 };
 
                 progressMessageHandler.HttpSendProgress += progress;
@@ -280,7 +285,7 @@ namespace B2Lib
                     progressMessageHandler.HttpSendProgress -= progress;
             }
         }
-
+        
         /// <summary>
         /// Calls b2_upload_file
         /// Needs an Upload Url

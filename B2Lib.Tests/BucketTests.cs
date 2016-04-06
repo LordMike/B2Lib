@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using B2Lib.Client;
 using B2Lib.Enums;
-using B2Lib.Objects;
 using B2Lib.SyncExtensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -19,21 +19,21 @@ namespace B2Lib.Tests
             client.Login(TestConfig.AccountId, TestConfig.ApplicationKey);
 
             // Create
-            B2Bucket bucket = client.CreateBucket(name, B2BucketType.AllPrivate);
+            B2BucketV2 bucket = client.CreateBucket(name, B2BucketType.AllPrivate);
             TestBucketContents(bucket, B2BucketType.AllPrivate);
 
             // Verify using a list
             VerifyBucketInList(client, true, name, B2BucketType.AllPrivate);
 
             // Update
-            bucket = client.UpdateBucket(bucket, B2BucketType.AllPublic);
+            bucket.Update(B2BucketType.AllPublic);
             TestBucketContents(bucket, B2BucketType.AllPublic);
 
             // Verify using a list
             VerifyBucketInList(client, true, name, B2BucketType.AllPublic);
 
             // Delete
-            bucket = client.DeleteBucket(bucket);
+            bucket.Delete();
             TestBucketContents(bucket, B2BucketType.AllPublic);
 
             // Verify using a list
@@ -42,7 +42,7 @@ namespace B2Lib.Tests
 
         private void VerifyBucketInList(B2Client client, bool shouldExist, string bucketName, B2BucketType expectedType)
         {
-            List<B2Bucket> list = client.ListBuckets();
+            IEnumerable<B2BucketV2> list = client.GetBuckets();
 
             bool exists = list.Any(s => s.BucketName == bucketName && s.BucketType == expectedType);
             if (shouldExist)
@@ -51,7 +51,7 @@ namespace B2Lib.Tests
                 Assert.IsFalse(exists);
         }
 
-        private void TestBucketContents(B2Bucket bucket, B2BucketType expectedType)
+        private void TestBucketContents(B2BucketV2 bucket, B2BucketType expectedType)
         {
             Assert.IsNotNull(bucket);
             Assert.IsFalse(string.IsNullOrWhiteSpace(bucket.AccountId));

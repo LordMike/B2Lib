@@ -16,10 +16,12 @@ namespace B2Lib.Utilities
             _currentStartPartNumber = startNumber;
         }
 
-        protected override List<B2LargeFilePart> GetNextPage()
+        protected override List<B2LargeFilePart> GetNextPage(out bool isDone)
         {
             B2LargeFilePartsContainer result = Communicator.ListLargeFileParts(ApiUri, _bucketId, _currentStartPartNumber, PageSize).Result;
             _currentStartPartNumber = result.NexPartNumber;
+
+            isDone = _currentStartPartNumber == 0;
 
             return result.Parts;
         }

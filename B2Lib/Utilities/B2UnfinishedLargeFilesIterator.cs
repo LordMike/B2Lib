@@ -16,10 +16,12 @@ namespace B2Lib.Utilities
             _currentStartFileId = startFileId;
         }
 
-        protected override List<B2UnfinishedLargeFile> GetNextPage()
+        protected override List<B2UnfinishedLargeFile> GetNextPage(out bool isDone)
         {
             B2UnfinishedLargeFilesContainer result = Communicator.ListUnfinishedLargeFiles(ApiUri, _bucketId, _currentStartFileId, PageSize).Result;
             _currentStartFileId = result.NextFileId;
+
+            isDone = _currentStartFileId == null;
 
             return result.Files;
         }

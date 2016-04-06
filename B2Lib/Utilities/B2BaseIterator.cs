@@ -18,15 +18,16 @@ namespace B2Lib.Utilities
             ApiUri = apiUri;
         }
 
-        protected abstract List<T> GetNextPage();
+        protected abstract List<T> GetNextPage(out bool isDone);
 
         protected abstract void PreProcessItem(T item);
 
         public IEnumerator<T> GetEnumerator()
         {
-            while (true)
+            bool isDone;
+            do
             {
-                List<T> page = GetNextPage();
+                List<T> page = GetNextPage(out isDone);
 
                 foreach (T item in page)
                 {
@@ -37,7 +38,7 @@ namespace B2Lib.Utilities
 
                 if (!page.Any())
                     yield break;
-            }
+            } while (!isDone);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

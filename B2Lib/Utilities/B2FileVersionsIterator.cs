@@ -1,39 +1,45 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
+using B2Lib.Client;
 using B2Lib.Objects;
 
 namespace B2Lib.Utilities
 {
-    public class B2FileVersionsIterator : B2BaseIterator<B2FileInfo>
+    public class B2FileVersionsIterator : B2BaseIterator<B2File>
     {
-        private readonly string _accountId;
+        private readonly B2Client _client;
         private readonly string _bucketId;
-        private string _currentStartName;
+        private string _currentStart;
         private string _currentStartId;
-        
-        internal B2FileVersionsIterator(B2Communicator communicator, Uri apiUri, string accountId, string bucketId, string startName, string startId)
-            : base(communicator,apiUri)
+
+        internal B2FileVersionsIterator(B2Client client, string bucketId, string startName, string startId) :
+            base(client.Communicator, client.ApiUrl)
         {
-            _accountId = accountId;
+            _client = client;
             _bucketId = bucketId;
-            _currentStartName = startName;
+            _currentStart = startName;
             _currentStartId = startId;
         }
-        
-        protected override List<B2FileInfo> GetNextPage()
-        {
-            B2FileListContainer result = Communicator.ListFileVersions(ApiUri, _bucketId, _currentStartName, _currentStartId, PageSize).Result;
 
-            _currentStartName = result.NextFileName;
+        protected override List<B2File> GetNextPage(out bool isDone)
+        {
+            B2FileListContainer result = Communicator.ListFileVersions(ApiUri, _bucketId, _currentStart, _currentStartId, PageSize).Result;
+            _currentStart = result.NextFileName;
             _currentStartId = result.NextFileId;
 
-            return result.Files;
+            isDone = _currentStart == null && _currentStartId == null;
+
+            return result.Files.Select(s =>
+            {
+                s.AccountId = _client.AccountId;
+                s.BucketId = _bucketId;
+
+                return new B2File(_client, s);
+            }).ToList();
         }
 
-        protected override void PreProcessItem(B2FileInfo item)
+        protected override void PreProcessItem(B2File item)
         {
-            item.BucketId = _bucketId;
-            item.AccountId = _accountId;
         }
     }
 }
