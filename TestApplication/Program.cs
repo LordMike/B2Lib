@@ -35,7 +35,7 @@ namespace TestApplication
                 bck = client.CreateBucket(name, B2BucketType.AllPrivate);
             }
 
-            List<B2FileWithSize> files = client.ListFileVersions(bck).ToList();
+            List<B2FileInfo> files = client.ListFileVersions(bck).ToList();
             Console.WriteLine(files.Count);
 
             Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 30 }, file =>

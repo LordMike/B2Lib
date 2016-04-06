@@ -4,7 +4,7 @@ namespace B2Lib.Objects
 {
     public class B2FileListContainer
     {
-        public List<B2FileWithSize> Files { get; set; }
+        public List<B2FileInfo> Files { get; set; }
 
         public string NextFileName { get; set; }
 

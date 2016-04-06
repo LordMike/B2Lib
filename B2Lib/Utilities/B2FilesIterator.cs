@@ -5,7 +5,7 @@ using B2Lib.Objects;
 
 namespace B2Lib.Utilities
 {
-    public class B2FilesIterator : IEnumerable<B2FileWithSize>
+    public class B2FilesIterator : IEnumerable<B2FileInfo>
     {
         private readonly B2Communicator _communicator;
         private readonly Uri _apiUri;
@@ -22,7 +22,7 @@ namespace B2Lib.Utilities
             _startName = startName;
         }
 
-        public IEnumerator<B2FileWithSize> GetEnumerator()
+        public IEnumerator<B2FileInfo> GetEnumerator()
         {
             string currentStart = _startName;
 
@@ -32,10 +32,8 @@ namespace B2Lib.Utilities
 
                 currentStart = result.NextFileName;
 
-                foreach (B2FileWithSize file in result.Files)
-                {
+                foreach (B2FileInfo file in result.Files)
                     yield return file;
-                }
 
                 if (string.IsNullOrEmpty(currentStart))
                     yield break;

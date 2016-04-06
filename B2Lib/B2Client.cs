@@ -22,10 +22,10 @@ namespace B2Lib
         }
         public string AccountId { get; private set; }
 
-        private ConcurrentDictionary<string, ConcurrentBag<B2UploadConfiguration>> _bucketUploadUrls;
-        private B2BucketCacher _bucketCache;
+        private readonly ConcurrentDictionary<string, ConcurrentBag<B2UploadConfiguration>> _bucketUploadUrls;
+        private readonly B2BucketCacher _bucketCache;
 
-        private B2Communicator _communicator;
+        private readonly B2Communicator _communicator;
 
         public Uri ApiUrl { get; private set; }
         public Uri DownloadUrl { get; private set; }
@@ -248,12 +248,7 @@ namespace B2Lib
         {
             return await DeleteFileAsync(file.FileName, file.FileId);
         }
-
-        public async Task<bool> DeleteFileAsync(B2FileInfo file)
-        {
-            return await DeleteFileAsync(file.FileName, file.FileId);
-        }
-
+        
         public async Task<bool> DeleteFileAsync(string fileName, string fileId)
         {
             ThrowExceptionIfNotAuthorized();

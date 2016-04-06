@@ -41,9 +41,9 @@ namespace B2Lib.Tests
         [ClassCleanup]
         public static void TestCleanup()
         {
-            List<B2FileWithSize> files = _client.ListFileVersions(_bucket).ToList();
+            List<B2FileInfo> files = _client.ListFileVersions(_bucket).ToList();
 
-            foreach (B2FileWithSize file in files)
+            foreach (B2FileBase file in files)
                 _client.DeleteFile(file);
 
             _client.DeleteBucket(_bucket);
@@ -86,8 +86,8 @@ namespace B2Lib.Tests
             listFileVersions.PageSize = 2;
 
             // Enumerate it
-            List<B2FileWithSize> list = listFiles.ToList();
-            List<B2FileWithSize> listVersions = listFileVersions.ToList();
+            List<B2FileInfo> list = listFiles.ToList();
+            List<B2FileInfo> listVersions = listFileVersions.ToList();
 
             foreach (B2FileInfo expected in files)
             {
@@ -116,14 +116,14 @@ namespace B2Lib.Tests
             TestFileContents(file2);
 
             // Enumerate it
-            List<B2FileWithSize> list = _client.ListFileVersions(_bucket).ToList();
-            List<B2FileWithSize> listFiles = list.Where(s => s.FileName == "test").ToList();
+            List<B2FileInfo> list = _client.ListFileVersions(_bucket).ToList();
+            List<B2FileInfo> listFiles = list.Where(s => s.FileName == "test").ToList();
 
             Assert.AreEqual(2, listFiles.Count);
             Assert.IsTrue(listFiles.Any(s => s.FileId == file1.FileId));
             Assert.IsTrue(listFiles.Any(s => s.FileId == file2.FileId));
 
-            foreach (B2FileWithSize listFile in listFiles)
+            foreach (B2FileInfo listFile in listFiles)
             {
                 TestFileContents(listFile, B2FileAction.Upload);
             }
@@ -148,8 +148,8 @@ namespace B2Lib.Tests
             TestFileContents(file);
 
             // Enumerate it
-            List<B2FileWithSize> list = _client.ListFiles(_bucket).ToList();
-            B2FileWithSize listFile = list.FirstOrDefault(s => s.FileId == file.FileId);
+            List<B2FileInfo> list = _client.ListFiles(_bucket).ToList();
+            B2FileInfo listFile = list.FirstOrDefault(s => s.FileId == file.FileId);
 
             TestFileContents(listFile, B2FileAction.Upload);
 
@@ -174,8 +174,8 @@ namespace B2Lib.Tests
             TestFileContents(file);
 
             // Enumerate it
-            List<B2FileWithSize> list = _client.ListFiles(_bucket).ToList();
-            B2FileWithSize listFile = list.FirstOrDefault(s => s.FileId == file.FileId);
+            List<B2FileInfo> list = _client.ListFiles(_bucket).ToList();
+            B2FileInfo listFile = list.FirstOrDefault(s => s.FileId == file.FileId);
 
             TestFileContents(listFile, B2FileAction.Upload);
 
@@ -190,7 +190,7 @@ namespace B2Lib.Tests
 
             // Enumerate versions (it should be visible)
             list = _client.ListFileVersions(_bucket).ToList();
-            B2FileWithSize hideFile = list.FirstOrDefault(s => s.FileId == hideFileItem.FileId);
+            B2FileInfo hideFile = list.FirstOrDefault(s => s.FileId == hideFileItem.FileId);
             listFile = list.FirstOrDefault(s => s.FileId == file.FileId);
 
             TestFileContents(hideFile, B2FileAction.Hide);
@@ -293,7 +293,7 @@ namespace B2Lib.Tests
             Assert.IsNotNull(file.FileInfo);
         }
 
-        private void TestFileContents(B2FileWithSize file, B2FileAction expectedAction)
+        private void TestFileContents(B2FileInfo file, B2FileAction expectedAction)
         {
             Assert.IsNotNull(file);
             Assert.IsFalse(string.IsNullOrWhiteSpace(file.FileId));
@@ -302,7 +302,7 @@ namespace B2Lib.Tests
 
             Assert.AreEqual(expectedAction, file.Action);
             if (file.Action == B2FileAction.Upload)
-                Assert.IsTrue(file.Size > 0);
+                Assert.IsTrue(file.ContentLength > 0);
         }
     }
 }

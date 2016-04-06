@@ -68,7 +68,6 @@
     <Compile Include="Utilities\B2FilesIterator.cs" />
     <Compile Include="Objects\B2FileInfo.cs" />
     <Compile Include="Utilities\B2FileVersionsIterator.cs" />
-    <Compile Include="Objects\B2FileWithSize.cs" />
     <Compile Include="Exceptions\B2MissingAuthenticationException.cs" />
     <Compile Include="Objects\B2SaveState.cs" />
     <Compile Include="Objects\B2UploadConfiguration.cs" />
