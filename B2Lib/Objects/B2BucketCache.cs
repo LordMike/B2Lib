@@ -23,9 +23,9 @@ namespace B2Lib.Objects
             };
         }
 
-        internal B2Bucket CreateBucketClass()
+        internal B2BucketObject CreateBucketClass()
         {
-            return new B2Bucket
+            return new B2BucketObject
             {
                 AccountId = AccountId,
                 BucketId = BucketId,

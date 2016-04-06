@@ -11,22 +11,22 @@ namespace B2Lib.SyncExtensions
             Utility.AsyncRunHelper(() => client.LoginAsync(accountId, applicationKey));
         }
 
-        public static IEnumerable<B2BucketV2> GetBuckets(this B2Client client)
+        public static IEnumerable<B2Bucket> GetBuckets(this B2Client client)
         {
             return Utility.AsyncRunHelper(() => client.GetBucketsAsync());
         }
 
-        public static B2BucketV2 CreateBucket(this B2Client client, string name, B2BucketType type)
+        public static B2Bucket CreateBucket(this B2Client client, string name, B2BucketType type)
         {
             return Utility.AsyncRunHelper(() => client.CreateBucketAsync(name, type));
         }
 
-        public static B2BucketV2 GetBucketByName(this B2Client client, string name)
+        public static B2Bucket GetBucketByName(this B2Client client, string name)
         {
             return Utility.AsyncRunHelper(() => client.GetBucketByNameAsync(name));
         }
 
-        public static B2BucketV2 GetBucketById(this B2Client client, string id)
+        public static B2Bucket GetBucketById(this B2Client client, string id)
         {
             return Utility.AsyncRunHelper(() => client.GetBucketByIdAsync(id));
         }

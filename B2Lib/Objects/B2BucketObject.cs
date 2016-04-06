@@ -2,7 +2,7 @@ using B2Lib.Enums;
 
 namespace B2Lib.Objects
 {
-    public class B2Bucket
+    public class B2BucketObject
     {
         public string BucketId { get; set; }
         public string AccountId { get; set; }

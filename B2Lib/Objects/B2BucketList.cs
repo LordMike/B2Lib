@@ -4,6 +4,6 @@ namespace B2Lib.Objects
 {
     internal class B2BucketList
     {
-        public List<B2Bucket> Buckets { get; set; }
+        public List<B2BucketObject> Buckets { get; set; }
     }
 }

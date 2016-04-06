@@ -101,7 +101,7 @@ namespace B2Lib
         /// 
         /// https://www.backblaze.com/b2/docs/b2_list_buckets.html
         /// </summary>
-        public async Task<List<B2Bucket>> ListBuckets(Uri apiUri, string accountId)
+        public async Task<List<B2BucketObject>> ListBuckets(Uri apiUri, string accountId)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_list_buckets", new { accountId });
 
@@ -113,11 +113,11 @@ namespace B2Lib
         /// 
         /// https://www.backblaze.com/b2/docs/b2_create_bucket.html
         /// </summary>
-        public async Task<B2Bucket> CreateBucket(Uri apiUri, string accountId, string name, B2BucketType bucketType)
+        public async Task<B2BucketObject> CreateBucket(Uri apiUri, string accountId, string name, B2BucketType bucketType)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_create_bucket", new { accountId, bucketName = name, bucketType = bucketType.GetDescription() });
 
-            return JsonConvert.DeserializeObject<B2Bucket>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+            return JsonConvert.DeserializeObject<B2BucketObject>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
         /// <summary>
@@ -125,11 +125,11 @@ namespace B2Lib
         /// 
         /// https://www.backblaze.com/b2/docs/b2_delete_bucket.html
         /// </summary>
-        public async Task<B2Bucket> DeleteBucket(Uri apiUri, string accountId, string bucketId)
+        public async Task<B2BucketObject> DeleteBucket(Uri apiUri, string accountId, string bucketId)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_delete_bucket", new { accountId, bucketId });
 
-            return JsonConvert.DeserializeObject<B2Bucket>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+            return JsonConvert.DeserializeObject<B2BucketObject>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
         /// <summary>
@@ -137,11 +137,11 @@ namespace B2Lib
         /// 
         /// https://www.backblaze.com/b2/docs/b2_update_bucket.html
         /// </summary>
-        public async Task<B2Bucket> UpdateBucket(Uri apiUri, string accountId, string bucketId, B2BucketType bucketType)
+        public async Task<B2BucketObject> UpdateBucket(Uri apiUri, string accountId, string bucketId, B2BucketType bucketType)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_update_bucket", new { accountId, bucketId, bucketType = bucketType.GetDescription() });
 
-            return JsonConvert.DeserializeObject<B2Bucket>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+            return JsonConvert.DeserializeObject<B2BucketObject>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
         /// <summary>

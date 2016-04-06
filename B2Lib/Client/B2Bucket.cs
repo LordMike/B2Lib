@@ -6,10 +6,10 @@ using B2Lib.Utilities;
 
 namespace B2Lib.Client
 {
-    public class B2BucketV2
+    public class B2Bucket
     {
         private readonly B2Client _b2Client;
-        private readonly B2Bucket _bucket;
+        private readonly B2BucketObject _bucket;
 
         public string BucketId => _bucket.BucketId;
         public string AccountId => _bucket.AccountId;
@@ -18,7 +18,7 @@ namespace B2Lib.Client
 
         public B2BucketState State { get; private set; }
 
-        internal B2BucketV2(B2Client b2Client, B2Bucket bucket)
+        internal B2Bucket(B2Client b2Client, B2BucketObject bucket)
         {
             _b2Client = b2Client;
             _bucket = bucket;
@@ -36,7 +36,7 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2BucketState.Present);
 
-            B2Bucket result = await _b2Client.Communicator.DeleteBucket(_b2Client.ApiUrl, _bucket.AccountId, _bucket.BucketId);
+            B2BucketObject result = await _b2Client.Communicator.DeleteBucket(_b2Client.ApiUrl, _bucket.AccountId, _bucket.BucketId);
             State = B2BucketState.Deleted;
 
             _b2Client.BucketCache.RemoveBucket(_bucket);
@@ -48,7 +48,7 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2BucketState.Present);
 
-            B2Bucket result = await _b2Client.Communicator.UpdateBucket(_b2Client.ApiUrl, _bucket.AccountId, _bucket.BucketId, newType);
+            B2BucketObject result = await _b2Client.Communicator.UpdateBucket(_b2Client.ApiUrl, _bucket.AccountId, _bucket.BucketId, newType);
 
             _bucket.BucketType = result.BucketType;
             return true;

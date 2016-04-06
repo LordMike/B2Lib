@@ -49,7 +49,7 @@
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
     <Compile Include="Client\B2BucketState.cs" />
-    <Compile Include="Client\B2BucketV2.cs" />
+    <Compile Include="Client\B2Bucket.cs" />
     <Compile Include="Client\B2Client.cs" />
     <Compile Include="Client\B2File.cs" />
     <Compile Include="Client\B2FileState.cs" />
@@ -59,7 +59,6 @@
     <Compile Include="Objects\B2LargeFilePartsContainer.cs" />
     <Compile Include="Objects\B2UnfinishedLargeFile.cs" />
     <Compile Include="Objects\B2UnfinishedLargeFilesContainer.cs" />
-    <Compile Include="Objects\B2Uploader.cs" />
     <Compile Include="Objects\B2UploadPartConfiguration.cs" />
     <Compile Include="Utilities\B2BaseIterator.cs" />
     <Compile Include="Utilities\B2FilesIterator.cs" />
@@ -70,7 +69,7 @@
     <Compile Include="Utilities\B2BucketCacher.cs" />
     <Compile Include="Exceptions\B2AuthenticationException.cs" />
     <Compile Include="Exceptions\B2AuthenticationResponse.cs" />
-    <Compile Include="Objects\B2Bucket.cs" />
+    <Compile Include="Objects\B2BucketObject.cs" />
     <Compile Include="Objects\B2BucketCache.cs" />
     <Compile Include="Objects\B2BucketList.cs" />
     <Compile Include="Enums\B2BucketType.cs" />
@@ -83,7 +82,7 @@
     <Compile Include="Objects\B2FileListContainer.cs" />
     <Compile Include="Objects\B2FileInfo.cs" />
     <Compile Include="Exceptions\B2MissingAuthenticationException.cs" />
-    <Compile Include="Objects\B2SaveState.cs" />
+    <Compile Include="Client\B2SaveState.cs" />
     <Compile Include="Objects\B2UploadConfiguration.cs" />
     <Compile Include="Utilities\EnumExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

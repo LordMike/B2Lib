@@ -5,18 +5,18 @@ namespace B2Lib.SyncExtensions
 {
     public static class B2BucketExtensions
     {
-        public static bool Delete(this B2BucketV2 bucket)
+        public static bool Delete(this B2Bucket bucket)
         {
             return Utility.AsyncRunHelper(bucket.DeleteAsync);
         }
 
-        public static bool Update(this B2BucketV2 bucket, B2BucketType newType)
+        public static bool Update(this B2Bucket bucket, B2BucketType newType)
         {
             return Utility.AsyncRunHelper(() => bucket.UpdateAsync(newType));
         }
 
 
-        public static bool HideFile(this B2BucketV2 bucket, string fileName)
+        public static bool HideFile(this B2Bucket bucket, string fileName)
         {
             return Utility.AsyncRunHelper(() => bucket.HideFileAsync(fileName));
         }

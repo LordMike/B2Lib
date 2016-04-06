@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using B2Lib.Objects;
 
-namespace B2Lib.Objects
+namespace B2Lib.Client
 {
     public class B2SaveState
     {

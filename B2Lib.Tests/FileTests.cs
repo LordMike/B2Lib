@@ -18,7 +18,7 @@ namespace B2Lib.Tests
     public class FileTests
     {
         private static B2Client _client;
-        private static B2BucketV2 _bucket;
+        private static B2Bucket _bucket;
         private static string _tmpPath;
 
         [ClassInitialize]

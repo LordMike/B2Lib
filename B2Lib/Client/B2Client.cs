@@ -136,42 +136,42 @@ namespace B2Lib.Client
             DownloadUrl = result.DownloadUrl;
         }
 
-        public async Task<IEnumerable<B2BucketV2>> GetBucketsAsync()
+        public async Task<IEnumerable<B2Bucket>> GetBucketsAsync()
         {
             ThrowExceptionIfNotAuthorized();
 
-            List<B2Bucket> buckets = await Communicator.ListBuckets(ApiUrl, AccountId);
+            List<B2BucketObject> buckets = await Communicator.ListBuckets(ApiUrl, AccountId);
 
             BucketCache.RecordBucket(buckets);
 
-            return buckets.Select(s => new B2BucketV2(this, s));
+            return buckets.Select(s => new B2Bucket(this, s));
         }
 
-        public async Task<B2BucketV2> CreateBucketAsync(string name, B2BucketType type)
+        public async Task<B2Bucket> CreateBucketAsync(string name, B2BucketType type)
         {
             ThrowExceptionIfNotAuthorized();
 
-            B2Bucket bucket = await Communicator.CreateBucket(ApiUrl, AccountId, name, type);
+            B2BucketObject bucket = await Communicator.CreateBucket(ApiUrl, AccountId, name, type);
 
             BucketCache.RecordBucket(bucket);
 
-            return new B2BucketV2(this, bucket);
+            return new B2Bucket(this, bucket);
         }
 
-        public async Task<B2BucketV2> GetBucketByNameAsync(string name)
+        public async Task<B2Bucket> GetBucketByNameAsync(string name)
         {
             ThrowExceptionIfNotAuthorized();
 
-            IEnumerable<B2BucketV2> buckets = await GetBucketsAsync();
+            IEnumerable<B2Bucket> buckets = await GetBucketsAsync();
 
             return buckets.FirstOrDefault(s => s.BucketName.Equals(name));
         }
 
-        public async Task<B2BucketV2> GetBucketByIdAsync(string id)
+        public async Task<B2Bucket> GetBucketByIdAsync(string id)
         {
             ThrowExceptionIfNotAuthorized();
 
-            IEnumerable<B2BucketV2> buckets = await GetBucketsAsync();
+            IEnumerable<B2Bucket> buckets = await GetBucketsAsync();
 
             return buckets.FirstOrDefault(s => s.BucketId.Equals(id));
         }

@@ -47,13 +47,13 @@ namespace B2Lib.Utilities
                 return _cache.SingleOrDefault(s => s.BucketName == name);
         }
 
-        public void RecordBucket(IEnumerable<B2Bucket> buckets)
+        public void RecordBucket(IEnumerable<B2BucketObject> buckets)
         {
-            foreach (B2Bucket bucket in buckets)
+            foreach (B2BucketObject bucket in buckets)
                 RecordBucket(bucket);
         }
 
-        public B2BucketCache RecordBucket(B2Bucket bucket)
+        public B2BucketCache RecordBucket(B2BucketObject bucket)
         {
             B2BucketCache item = GetById(bucket.BucketId, true);
 
@@ -63,7 +63,7 @@ namespace B2Lib.Utilities
             return item;
         }
         
-        public void RemoveBucket(B2Bucket bucket)
+        public void RemoveBucket(B2BucketObject bucket)
         {
             lock (_cache)
                 _cache.RemoveAll(s => s.BucketId == bucket.BucketId);
