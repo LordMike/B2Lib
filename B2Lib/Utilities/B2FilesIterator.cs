@@ -9,15 +9,17 @@ namespace B2Lib.Utilities
     {
         private readonly B2Communicator _communicator;
         private readonly Uri _apiUri;
+        private readonly string _accountId;
         private readonly string _bucketId;
         private readonly string _startName;
 
         public int PageSize { get; set; } = 1000;
 
-        internal B2FilesIterator(B2Communicator communicator, Uri apiUri, string bucketId, string startName)
+        internal B2FilesIterator(B2Communicator communicator, Uri apiUri, string accountId, string bucketId, string startName)
         {
             _communicator = communicator;
             _apiUri = apiUri;
+            _accountId = accountId;
             _bucketId = bucketId;
             _startName = startName;
         }
@@ -33,7 +35,12 @@ namespace B2Lib.Utilities
                 currentStart = result.NextFileName;
 
                 foreach (B2FileInfo file in result.Files)
+                {
+                    file.BucketId = _bucketId;
+                    file.AccountId = _accountId;
+
                     yield return file;
+                }
 
                 if (string.IsNullOrEmpty(currentStart))
                     yield break;

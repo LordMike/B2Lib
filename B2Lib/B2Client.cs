@@ -265,7 +265,7 @@ namespace B2Lib
 
         public B2FilesIterator ListFiles(string bucketId, string startFileName = null)
         {
-            return new B2FilesIterator(_communicator, ApiUrl, bucketId, startFileName);
+            return new B2FilesIterator(_communicator, ApiUrl, AccountId, bucketId, startFileName);
         }
 
         public B2FileVersionsIterator ListFileVersions(B2Bucket bucket, string startFileName = null, string startFileId = null)
@@ -275,7 +275,7 @@ namespace B2Lib
 
         public B2FileVersionsIterator ListFileVersions(string bucketId, string startFileName = null, string startFileId = null)
         {
-            return new B2FileVersionsIterator(_communicator, ApiUrl, bucketId, startFileName, startFileId);
+            return new B2FileVersionsIterator(_communicator, ApiUrl, AccountId, bucketId, startFileName, startFileId);
         }
 
         public async Task<B2FileInfo> UploadFileAsync(B2Bucket bucket, FileInfo file, string fileName, string contentType = null)

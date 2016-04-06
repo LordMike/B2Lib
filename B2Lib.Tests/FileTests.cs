@@ -285,11 +285,22 @@ namespace B2Lib.Tests
             Assert.IsFalse(string.IsNullOrWhiteSpace(file.FileId));
             Assert.IsFalse(string.IsNullOrWhiteSpace(file.FileName));
             Assert.IsFalse(string.IsNullOrWhiteSpace(file.BucketId));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(file.ContentSha1));
             Assert.IsFalse(string.IsNullOrWhiteSpace(file.AccountId));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(file.ContentType));
             Assert.IsTrue(file.UploadTimestamp > DateTime.MinValue);
-            Assert.IsTrue(file.ContentLength > 0);
+            Assert.IsTrue(Enum.IsDefined(typeof(B2FileAction), file.Action));
+
+            if (file.Action == B2FileAction.Hide)
+            {
+                Assert.AreEqual(0, file.ContentLength);
+                Assert.IsTrue(string.IsNullOrWhiteSpace(file.ContentSha1));
+                Assert.IsTrue(string.IsNullOrWhiteSpace(file.ContentType));
+            }
+            else
+            {
+                Assert.IsTrue(file.ContentLength > 0);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(file.ContentSha1));
+                Assert.IsFalse(string.IsNullOrWhiteSpace(file.ContentType));
+            }
 
             Assert.IsNotNull(file.FileInfo);
         }
