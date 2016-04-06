@@ -75,6 +75,11 @@ namespace B2Lib
             return resp;
         }
 
+        /// <summary>
+        /// Calls b2_authorize_account
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_authorize_account.html
+        /// </summary>
         public async Task<B2AuthenticationResponse> Login(string accountId, string applicationKey)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Get, UriAuth);
@@ -89,6 +94,11 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2AuthenticationResponse>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
+        /// <summary>
+        /// Calls b2_list_buckets
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_list_buckets.html
+        /// </summary>
         public async Task<List<B2Bucket>> ListBuckets(Uri apiUri, string accountId)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_list_buckets", new { accountId });
@@ -96,6 +106,11 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2BucketList>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false)).Buckets;
         }
 
+        /// <summary>
+        /// Calls b2_create_bucket
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_create_bucket.html
+        /// </summary>
         public async Task<B2Bucket> CreateBucket(Uri apiUri, string accountId, string name, B2BucketType bucketType)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_create_bucket", new { accountId, bucketName = name, bucketType = bucketType.GetDescription() });
@@ -103,6 +118,11 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2Bucket>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
+        /// <summary>
+        /// Calls b2_delete_bucket
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_delete_bucket.html
+        /// </summary>
         public async Task<B2Bucket> DeleteBucket(Uri apiUri, string accountId, string bucketId)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_delete_bucket", new { accountId, bucketId });
@@ -110,6 +130,11 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2Bucket>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
+        /// <summary>
+        /// Calls b2_update_bucket
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_update_bucket.html
+        /// </summary>
         public async Task<B2Bucket> UpdateBucket(Uri apiUri, string accountId, string bucketId, B2BucketType bucketType)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_update_bucket", new { accountId, bucketId, bucketType = bucketType.GetDescription() });
@@ -117,6 +142,11 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2Bucket>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
+        /// <summary>
+        /// Calls b2_hide_file
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_hide_file.html
+        /// </summary>
         public async Task<B2FileBase> HideFile(Uri apiUri, string bucketId, string fileName)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_hide_file", new { bucketId, fileName });
@@ -124,6 +154,11 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2FileBase>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
+        /// <summary>
+        /// Calls b2_delete_file_version
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_delete_file_version.html
+        /// </summary>
         public async Task<bool> DeleteFile(Uri apiUri, string fileName, string fileId)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_delete_file_version", new { fileId, fileName });
@@ -131,6 +166,11 @@ namespace B2Lib
             return resp.StatusCode == HttpStatusCode.OK;
         }
 
+        /// <summary>
+        /// Calls b2_get_file_info
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_get_file_info.html
+        /// </summary>
         public async Task<B2FileInfo> GetFileInfo(Uri apiUri, string fileId)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_get_file_info", new { fileId });
@@ -138,6 +178,11 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2FileInfo>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
+        /// <summary>
+        /// Calls b2_list_file_names
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_list_file_names.html
+        /// </summary>
         public async Task<B2FileListContainer> ListFiles(Uri apiUri, string bucketId, string startFileName = null, int maxFileCount = 100)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_list_file_names", new { bucketId, startFileName, maxFileCount });
@@ -145,6 +190,11 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2FileListContainer>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
+        /// <summary>
+        /// Calls b2_list_file_versions
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_list_file_versions.html
+        /// </summary>
         public async Task<B2FileListContainer> ListFileVersions(Uri apiUri, string bucketId, string startFileName = null, string startFileId = null, int maxFileCount = 100)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_list_file_versions", new { bucketId, startFileName, maxFileCount, startFileId });
@@ -152,6 +202,11 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2FileListContainer>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
+        /// <summary>
+        /// Calls b2_get_upload_url
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_get_upload_url.html
+        /// </summary>
         public async Task<B2UploadConfiguration> GetUploadUrl(Uri apiUri, string bucketId)
         {
             HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_get_upload_url", new { bucketId });
@@ -159,6 +214,12 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2UploadConfiguration>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
+        /// <summary>
+        /// Calls b2_upload_file
+        /// Needs an Upload Url
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_upload_file.html
+        /// </summary>
         public async Task<B2FileInfo> UploadFile(Uri uploadUri, string uploadToken, B2Uploader uploader)
         {
             // Pre-checks
@@ -220,6 +281,12 @@ namespace B2Lib
             }
         }
 
+        /// <summary>
+        /// Calls b2_upload_file
+        /// Needs an Upload Url
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_upload_file.html
+        /// </summary>
         public async Task<B2FileInfo> UploadFile(Uri uploadUri, string uploadToken, Stream stream, string fileName, string sha1, string contentType = null)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, uploadUri);
@@ -239,6 +306,11 @@ namespace B2Lib
             return JsonConvert.DeserializeObject<B2FileInfo>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
 
+        /// <summary>
+        /// Calls b2_download_file_by_id
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_download_file_by_id.html
+        /// </summary>
         public async Task<B2FileDownloadResult> DownloadFileHead(Uri downloadUri, string fileId, string overrideAuthToken = null)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Head, new Uri(downloadUri, "/b2api/v1/b2_download_file_by_id?fileId=" + fileId));
@@ -275,6 +347,11 @@ namespace B2Lib
             return res;
         }
 
+        /// <summary>
+        /// Calls b2_download_file_by_id
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_download_file_by_id.html
+        /// </summary>
         public async Task<B2DownloadResult> DownloadFileContent(Uri downloadUri, string fileId, string overrideAuthToken = null)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Get, new Uri(downloadUri, "/b2api/v1/b2_download_file_by_id?fileId=" + fileId));
@@ -315,5 +392,7 @@ namespace B2Lib
 
             return result;
         }
+
+
     }
 }
