@@ -1,55 +1,35 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using B2Lib.Objects;
 
 namespace B2Lib.Utilities
 {
-    public class B2FilesIterator : IEnumerable<B2FileInfo>
+    public class B2FilesIterator : B2BaseIterator<B2FileInfo>
     {
-        private readonly B2Communicator _communicator;
-        private readonly Uri _apiUri;
         private readonly string _accountId;
         private readonly string _bucketId;
-        private readonly string _startName;
+        private string _currentStart;
 
-        public int PageSize { get; set; } = 1000;
-
-        internal B2FilesIterator(B2Communicator communicator, Uri apiUri, string accountId, string bucketId, string startName)
+        internal B2FilesIterator(B2Communicator communicator, Uri apiUri, string accountId, string bucketId, string startName) :
+            base(communicator, apiUri)
         {
-            _communicator = communicator;
-            _apiUri = apiUri;
             _accountId = accountId;
             _bucketId = bucketId;
-            _startName = startName;
+            _currentStart = startName;
         }
 
-        public IEnumerator<B2FileInfo> GetEnumerator()
+        protected override List<B2FileInfo> GetNextPage()
         {
-            string currentStart = _startName;
+            B2FileListContainer result = Communicator.ListFiles(ApiUri, _bucketId, _currentStart, PageSize).Result;
+            _currentStart = result.NextFileName;
 
-            while (true)
-            {
-                B2FileListContainer result = _communicator.ListFiles(_apiUri, _bucketId, currentStart, PageSize).Result;
-
-                currentStart = result.NextFileName;
-
-                foreach (B2FileInfo file in result.Files)
-                {
-                    file.BucketId = _bucketId;
-                    file.AccountId = _accountId;
-
-                    yield return file;
-                }
-
-                if (string.IsNullOrEmpty(currentStart))
-                    yield break;
-            }
+            return result.Files;
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        protected override void PreProcessItem(B2FileInfo item)
         {
-            return GetEnumerator();
+            item.BucketId = _bucketId;
+            item.AccountId = _accountId;
         }
     }
 }

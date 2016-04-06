@@ -1,59 +1,39 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using B2Lib.Objects;
 
 namespace B2Lib.Utilities
 {
-    public class B2FileVersionsIterator : IEnumerable<B2FileInfo>
+    public class B2FileVersionsIterator : B2BaseIterator<B2FileInfo>
     {
-        private readonly B2Communicator _communicator;
-        private readonly Uri _apiUri;
         private readonly string _accountId;
         private readonly string _bucketId;
-        private readonly string _startName;
-        private readonly string _startId;
-
-        public int PageSize { get; set; } = 1000;
-
+        private string _currentStartName;
+        private string _currentStartId;
+        
         internal B2FileVersionsIterator(B2Communicator communicator, Uri apiUri, string accountId, string bucketId, string startName, string startId)
+            : base(communicator,apiUri)
         {
-            _communicator = communicator;
-            _apiUri = apiUri;
             _accountId = accountId;
             _bucketId = bucketId;
-            _startName = startName;
-            _startId = startId;
+            _currentStartName = startName;
+            _currentStartId = startId;
+        }
+        
+        protected override List<B2FileInfo> GetNextPage()
+        {
+            B2FileListContainer result = Communicator.ListFileVersions(ApiUri, _bucketId, _currentStartName, _currentStartId, PageSize).Result;
+
+            _currentStartName = result.NextFileName;
+            _currentStartId = result.NextFileId;
+
+            return result.Files;
         }
 
-        public IEnumerator<B2FileInfo> GetEnumerator()
+        protected override void PreProcessItem(B2FileInfo item)
         {
-            string currentStart = _startName;
-            string currentStartId = _startId;
-
-            while (true)
-            {
-                B2FileListContainer result = _communicator.ListFileVersions(_apiUri, _bucketId, currentStart, currentStartId, PageSize).Result;
-
-                currentStart = result.NextFileName;
-                currentStartId = result.NextFileId;
-
-                foreach (B2FileInfo file in result.Files)
-                {
-                    file.BucketId = _bucketId;
-                    file.AccountId = _accountId;
-
-                    yield return file;
-                }
-
-                if (string.IsNullOrEmpty(currentStart) && string.IsNullOrEmpty(currentStartId))
-                    yield break;
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            item.BucketId = _bucketId;
+            item.AccountId = _accountId;
         }
     }
 }

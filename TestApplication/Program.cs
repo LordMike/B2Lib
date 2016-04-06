@@ -28,12 +28,19 @@ namespace TestApplication
                 client.SaveState("state");
             }
 
-            string name = "test-123";
+            string name = "testbucket-lordmike-123";
             B2Bucket bck = client.GetBucketByName(name);
             if (bck == null)
             {
                 bck = client.CreateBucket(name, B2BucketType.AllPrivate);
             }
+
+            string path = Path.GetTempFileName();
+            File.WriteAllText(path, "Testworld".PadRight(2000, 'A'));
+
+            var res = client.UploadFile(bck, new FileInfo(path), "Testfile.txt");
+
+            return;
 
             List<B2FileInfo> files = client.ListFileVersions(bck).ToList();
             Console.WriteLine(files.Count);

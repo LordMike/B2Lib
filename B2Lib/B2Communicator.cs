@@ -17,7 +17,7 @@ using Newtonsoft.Json;
 
 namespace B2Lib
 {
-    internal class B2Communicator
+    public class B2Communicator
     {
         private static readonly Uri UriAuth = new Uri("https://api.backblaze.com/b2api/v1/b2_authorize_account");
 
@@ -258,10 +258,10 @@ namespace B2Lib
                 {
                     uploader.NotifyDelegate(args.TotalBytes ?? 0, args.TotalBytes ?? 0);
                 };
-                
+
                 progressMessageHandler.HttpSendProgress += progress;
             }
-            
+
             try
             {
                 using (HttpClient http = GetHttpClient(true, progressMessageHandler))
@@ -394,5 +394,124 @@ namespace B2Lib
         }
 
 
+        /// <summary>
+        /// Calls b2_get_upload_part_url
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_get_upload_part_url.html
+        /// </summary>
+        public async Task<B2UploadPartConfiguration> GetPartUploadUrl(Uri apiUri, string fileId)
+        {
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_get_upload_part_url", new { fileId });
+
+            return JsonConvert.DeserializeObject<B2UploadPartConfiguration>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+        }
+
+        /// <summary>
+        /// Calls b2_cancel_large_file
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_cancel_large_file.html
+        /// </summary>
+        public async Task<B2CanceledLargeFile> CancelLargeFileUpload(Uri apiUri, string fileId)
+        {
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_cancel_large_file", new { fileId });
+
+            return JsonConvert.DeserializeObject<B2CanceledLargeFile>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+        }
+
+        /// <summary>
+        /// Calls b2_finish_large_file
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_finish_large_file.html
+        /// </summary>
+        public async Task<B2FileInfo> FinishLargeFileUpload(Uri apiUri, string fileId, List<string> partSha1Array)
+        {
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_finish_large_file", new { fileId, partSha1Array });
+
+            return JsonConvert.DeserializeObject<B2FileInfo>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+        }
+
+        /// <summary>
+        /// Calls b2_start_large_file
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_start_large_file.html
+        /// </summary>
+        public async Task<B2FileInfo> StartLargeFileUpload(Uri apiUri, string bucketId, string fileName, string contentType, Dictionary<string, string> fileInfo)
+        {
+            // Pre-checks
+            if (string.IsNullOrEmpty(bucketId))
+                throw new ArgumentException("BucketId must be set");
+
+            if (string.IsNullOrEmpty(fileName))
+                throw new ArgumentException("Filename must be set");
+
+            if (string.IsNullOrEmpty(contentType))
+                throw new ArgumentException("ContentType must be set");
+
+            // Prepare
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_start_large_file", new
+            {
+                bucketId,
+                fileName,
+                contentType,
+                fileInfo
+            });
+
+            B2FileInfo file = JsonConvert.DeserializeObject<B2FileInfo>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+
+            file.Action = B2FileAction.Upload;
+
+            return file;
+        }
+
+        /// <summary>
+        /// Calls b2_list_parts
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_list_parts.html
+        /// </summary>
+        public async Task<B2LargeFilePartsContainer> ListLargeFileParts(Uri apiUri, string fileId, int startPartNumber = 0, int maxPartCount = 100)
+        {
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_list_parts", new { fileId, startPartNumber, maxPartCount });
+
+            return JsonConvert.DeserializeObject<B2LargeFilePartsContainer>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+        }
+
+        /// <summary>
+        /// Calls b2_list_unfinished_large_files
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_list_unfinished_large_files.html
+        /// </summary>
+        public async Task<B2UnfinishedLargeFilesContainer> ListUnfinishedLargeFiles(Uri apiUri, string bucketId, string startFileId = null, int maxFileCount = 100)
+        {
+            HttpResponseMessage resp = await InternalRequest(apiUri, "/b2api/v1/b2_list_unfinished_large_files", new { bucketId, startFileId, maxFileCount });
+
+            return JsonConvert.DeserializeObject<B2UnfinishedLargeFilesContainer>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+        }
+
+        /// <summary>
+        /// Calls b2_upload_part
+        /// 
+        /// https://www.backblaze.com/b2/docs/b2_upload_part.html
+        /// </summary>
+        public async Task<B2LargeFilePart> UploadPart(Uri uploadUri, string uploadToken, int partNumber, Stream stream, long length, string sha1)
+        {
+            HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, uploadUri);
+
+            msg.Headers.Authorization = new AuthenticationHeaderValue(uploadToken);
+            msg.Headers.Add("X-Bz-Content-Sha1", sha1);
+
+            msg.Content = new StreamContent(stream);
+            msg.Content.Headers.ContentLength = length;
+
+            HttpResponseMessage resp = await GetHttpClient(true).SendAsync(msg).ConfigureAwait(false);
+
+            if (resp.StatusCode != HttpStatusCode.OK)
+                await HandleErrorResponse(resp);
+
+            B2LargeFilePart result = JsonConvert.DeserializeObject<B2LargeFilePart>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+
+            result.UploadTimestamp = DateTime.UtcNow;
+
+            return result;
+        }
     }
 }

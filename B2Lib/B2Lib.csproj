@@ -48,8 +48,18 @@
     <Compile Include="..\VersionInfo.cs">
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
+    <Compile Include="Objects\B2CanceledLargeFile.cs" />
     <Compile Include="Objects\B2DownloadResult.cs" />
+    <Compile Include="Objects\B2LargeFilePart.cs" />
+    <Compile Include="Objects\B2LargeFilePartsContainer.cs" />
+    <Compile Include="Objects\B2UnfinishedLargeFile.cs" />
+    <Compile Include="Objects\B2UnfinishedLargeFilesContainer.cs" />
     <Compile Include="Objects\B2Uploader.cs" />
+    <Compile Include="Objects\B2UploadPartConfiguration.cs" />
+    <Compile Include="Utilities\B2BaseIterator.cs" />
+    <Compile Include="Utilities\B2FileVersionsIterator.cs" />
+    <Compile Include="Utilities\B2LargeFilePartsIterator.cs" />
+    <Compile Include="Utilities\B2UnfinishedLargeFilesIterator.cs" />
     <Compile Include="Utilities\UnixDateTimeConverter.cs" />
     <Compile Include="Utilities\B2BucketCacher.cs" />
     <Compile Include="B2Client.cs" />
@@ -68,7 +78,6 @@
     <Compile Include="Objects\B2FileListContainer.cs" />
     <Compile Include="Utilities\B2FilesIterator.cs" />
     <Compile Include="Objects\B2FileInfo.cs" />
-    <Compile Include="Utilities\B2FileVersionsIterator.cs" />
     <Compile Include="Exceptions\B2MissingAuthenticationException.cs" />
     <Compile Include="Objects\B2SaveState.cs" />
     <Compile Include="Objects\B2UploadConfiguration.cs" />
