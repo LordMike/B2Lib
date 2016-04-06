@@ -15,7 +15,7 @@ namespace B2Lib.Utilities
 
         public int PageSize { get; set; } = 1000;
 
-        public B2FileVersionsIterator(B2Communicator communicator, Uri apiUri, string bucketId, string startName, string startId)
+        internal B2FileVersionsIterator(B2Communicator communicator, Uri apiUri, string bucketId, string startName, string startId)
         {
             _communicator = communicator;
             _apiUri = apiUri;

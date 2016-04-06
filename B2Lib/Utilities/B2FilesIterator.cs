@@ -12,9 +12,9 @@ namespace B2Lib.Utilities
         private readonly string _bucketId;
         private readonly string _startName;
 
-        public int PageSize { get; set; } = 100;
+        public int PageSize { get; set; } = 1000;
 
-        public B2FilesIterator(B2Communicator communicator, Uri apiUri, string bucketId, string startName)
+        internal B2FilesIterator(B2Communicator communicator, Uri apiUri, string bucketId, string startName)
         {
             _communicator = communicator;
             _apiUri = apiUri;

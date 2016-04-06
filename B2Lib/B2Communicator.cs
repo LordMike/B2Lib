@@ -17,7 +17,7 @@ using Newtonsoft.Json;
 
 namespace B2Lib
 {
-    public class B2Communicator
+    internal class B2Communicator
     {
         private static readonly Uri UriAuth = new Uri("https://api.backblaze.com/b2api/v1/b2_authorize_account");
 
