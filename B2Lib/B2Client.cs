@@ -123,7 +123,7 @@ namespace B2Lib
 
         public async Task LoginAsync(string accountId, string applicationKey)
         {
-            B2AuthenticationResponse result = await _communicator.Login(accountId, applicationKey);
+            B2AuthenticationResponse result = await _communicator.AuthorizeAccount(accountId, applicationKey);
 
             AccountId = result.AccountId;
             AuthorizationToken = result.AuthorizationToken;

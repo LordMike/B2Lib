@@ -80,7 +80,7 @@ namespace B2Lib
         /// 
         /// https://www.backblaze.com/b2/docs/b2_authorize_account.html
         /// </summary>
-        public async Task<B2AuthenticationResponse> Login(string accountId, string applicationKey)
+        public async Task<B2AuthenticationResponse> AuthorizeAccount(string accountId, string applicationKey)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Get, UriAuth);
 
