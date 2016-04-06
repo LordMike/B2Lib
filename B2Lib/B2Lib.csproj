@@ -50,6 +50,7 @@
     </Compile>
     <Compile Include="Objects\B2DownloadResult.cs" />
     <Compile Include="Objects\B2Uploader.cs" />
+    <Compile Include="Utilities\UnixDateTimeConverter.cs" />
     <Compile Include="Utilities\B2BucketCacher.cs" />
     <Compile Include="B2Client.cs" />
     <Compile Include="Exceptions\B2AuthenticationException.cs" />

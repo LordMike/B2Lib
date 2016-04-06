@@ -249,13 +249,13 @@ namespace B2Lib.Tests
 
                 uploader.SetFileName("test");
                 uploader.SetInput(fs);
-                
+
                 uploader.CalculateSha1FromInput();
 
                 file = _client.UploadFile(uploader);
                 TestFileContents(file);
             }
-            
+
             // Fetch info
             B2FileInfo info = _client.GetFileInfo(file.FileId);
             TestFileContents(info);
@@ -288,6 +288,7 @@ namespace B2Lib.Tests
             Assert.IsFalse(string.IsNullOrWhiteSpace(file.ContentSha1));
             Assert.IsFalse(string.IsNullOrWhiteSpace(file.AccountId));
             Assert.IsFalse(string.IsNullOrWhiteSpace(file.ContentType));
+            Assert.IsTrue(file.UploadTimestamp > DateTime.MinValue);
             Assert.IsTrue(file.ContentLength > 0);
 
             Assert.IsNotNull(file.FileInfo);
@@ -295,10 +296,7 @@ namespace B2Lib.Tests
 
         private void TestFileContents(B2FileInfo file, B2FileAction expectedAction)
         {
-            Assert.IsNotNull(file);
-            Assert.IsFalse(string.IsNullOrWhiteSpace(file.FileId));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(file.FileName));
-            Assert.IsTrue(file.UploadTimestamp > 0);
+            TestFileContents(file);
 
             Assert.AreEqual(expectedAction, file.Action);
             if (file.Action == B2FileAction.Upload)

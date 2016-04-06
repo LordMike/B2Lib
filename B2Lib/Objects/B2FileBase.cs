@@ -1,5 +1,7 @@
 using System;
 using B2Lib.Enums;
+using B2Lib.Utilities;
+using Newtonsoft.Json;
 
 namespace B2Lib.Objects
 {
@@ -11,10 +13,8 @@ namespace B2Lib.Objects
 
         public string FileName { get; set; }
 
-        public long UploadTimestamp { get; set; }
-
-        // TODO: Json convert
-        public DateTime UploadTimestampDate => new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(UploadTimestamp);
+        [JsonConverter(typeof(UnixDateTimeConverter))]
+        public DateTime UploadTimestamp { get; set; }
 
         public override string ToString()
         {
