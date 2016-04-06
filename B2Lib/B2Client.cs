@@ -328,7 +328,7 @@ namespace B2Lib
 
         public B2Uploader GetUploader(string bucketId)
         {
-            return new B2Uploader(this, bucketId);
+            return new B2Uploader(bucketId);
         }
 
         internal void ReturnUploadConfig(string bucketId, B2UploadConfiguration config)

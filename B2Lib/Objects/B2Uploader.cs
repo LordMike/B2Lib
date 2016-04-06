@@ -1,12 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 
 namespace B2Lib.Objects
 {
@@ -22,9 +17,9 @@ namespace B2Lib.Objects
         internal string Sha1 { get; private set; }
         internal NotifyProgress NotifyDelegate { get; private set; }
 
-        internal Dictionary<string, string> Infoes { get; private set; }
+        internal Dictionary<string, string> Infoes { get; }
 
-        public B2Uploader(B2Client client, string bucketId)
+        public B2Uploader(string bucketId)
         {
             BucketId = bucketId;
             ContentType = "b2/x-auto";
