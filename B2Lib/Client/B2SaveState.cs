@@ -9,6 +9,7 @@ namespace B2Lib.Client
     {
         public string AccountId { get; set; }
         public string AuthorizationToken { get; set; }
+        public long MinimumPartSize { get; set; }
 
         public Uri ApiUrl { get; set; }
         public Uri DownloadUrl { get; set; }
@@ -19,6 +20,7 @@ namespace B2Lib.Client
         {
             other.AccountId = AccountId;
             other.AuthorizationToken = AuthorizationToken;
+            other.MinimumPartSize = MinimumPartSize;
 
             other.ApiUrl = ApiUrl;
             other.DownloadUrl = DownloadUrl;

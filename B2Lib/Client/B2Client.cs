@@ -21,14 +21,24 @@ namespace B2Lib.Client
         }
 
         public string AccountId { get; private set; }
+        public long MinimumPartSize { get; set; }
 
         private readonly ConcurrentDictionary<string, ConcurrentBag<B2UploadConfiguration>> _bucketUploadUrls;
-        internal B2BucketCacher BucketCache { get; private set; }
 
+        internal B2BucketCacher BucketCache { get; private set; }
         internal B2Communicator Communicator { get; private set; }
 
-        public Uri ApiUrl { get; private set; }
-        public Uri DownloadUrl { get; private set; }
+        public Uri ApiUri
+        {
+            get { return Communicator.ApiUri; }
+            private set { Communicator.ApiUri = value; }
+        }
+
+        public Uri DownloadUri
+        {
+            get { return Communicator.DownloadUri; }
+            private set { Communicator.DownloadUri = value; }
+        }
 
         public TimeSpan TimeoutMeta
         {
@@ -53,9 +63,10 @@ namespace B2Lib.Client
         {
             AccountId = state.AccountId;
             AuthorizationToken = state.AuthorizationToken;
+            MinimumPartSize = state.MinimumPartSize;
 
-            ApiUrl = state.ApiUrl;
-            DownloadUrl = state.DownloadUrl;
+            ApiUri = state.ApiUrl;
+            DownloadUri = state.DownloadUrl;
 
             BucketCache.LoadState(state.BucketCache);
         }
@@ -73,9 +84,10 @@ namespace B2Lib.Client
 
             res.AccountId = AccountId;
             res.AuthorizationToken = AuthorizationToken;
+            res.MinimumPartSize = MinimumPartSize;
 
-            res.ApiUrl = ApiUrl;
-            res.DownloadUrl = DownloadUrl;
+            res.ApiUrl = ApiUri;
+            res.DownloadUrl = DownloadUri;
 
             res.BucketCache = BucketCache.GetState();
 
@@ -114,7 +126,7 @@ namespace B2Lib.Client
             B2UploadConfiguration res;
             try
             {
-                res = Communicator.GetUploadUrl(ApiUrl, bucketId).Result;
+                res = Communicator.GetUploadUrl(bucketId).Result;
             }
             catch (AggregateException ex)
             {
@@ -131,16 +143,17 @@ namespace B2Lib.Client
 
             AccountId = result.AccountId;
             AuthorizationToken = result.AuthorizationToken;
+            MinimumPartSize = result.MinimumPartSize;
 
-            ApiUrl = result.ApiUrl;
-            DownloadUrl = result.DownloadUrl;
+            ApiUri = result.ApiUrl;
+            DownloadUri = result.DownloadUrl;
         }
 
         public async Task<IEnumerable<B2Bucket>> GetBucketsAsync()
         {
             ThrowExceptionIfNotAuthorized();
 
-            List<B2BucketObject> buckets = await Communicator.ListBuckets(ApiUrl, AccountId);
+            List<B2BucketObject> buckets = await Communicator.ListBuckets(AccountId);
 
             BucketCache.RecordBucket(buckets);
 
@@ -151,7 +164,7 @@ namespace B2Lib.Client
         {
             ThrowExceptionIfNotAuthorized();
 
-            B2BucketObject bucket = await Communicator.CreateBucket(ApiUrl, AccountId, name, type);
+            B2BucketObject bucket = await Communicator.CreateBucket(AccountId, name, type);
 
             BucketCache.RecordBucket(bucket);
 

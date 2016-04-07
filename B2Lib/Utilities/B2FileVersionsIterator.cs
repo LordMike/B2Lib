@@ -13,7 +13,7 @@ namespace B2Lib.Utilities
         private string _currentStartId;
 
         internal B2FileVersionsIterator(B2Client client, string bucketId, string startName, string startId) :
-            base(client.Communicator, client.ApiUrl)
+            base(client.Communicator)
         {
             _client = client;
             _bucketId = bucketId;
@@ -23,7 +23,7 @@ namespace B2Lib.Utilities
 
         protected override List<B2File> GetNextPage(out bool isDone)
         {
-            B2FileListContainer result = Communicator.ListFileVersions(ApiUri, _bucketId, _currentStart, _currentStartId, PageSize).Result;
+            B2FileListContainer result = Communicator.ListFileVersions(_bucketId, _currentStart, _currentStartId, PageSize).Result;
             _currentStart = result.NextFileName;
             _currentStartId = result.NextFileId;
 

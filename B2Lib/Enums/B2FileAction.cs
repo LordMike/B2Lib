@@ -8,6 +8,9 @@ namespace B2Lib.Enums
         Upload,
 
         [Description("hide")]
-        Hide
+        Hide,
+
+        [Description("start")]
+        Start
     }
 }

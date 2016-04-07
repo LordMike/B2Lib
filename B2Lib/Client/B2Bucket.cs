@@ -36,7 +36,7 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2BucketState.Present);
 
-            B2BucketObject result = await _b2Client.Communicator.DeleteBucket(_b2Client.ApiUrl, _bucket.AccountId, _bucket.BucketId);
+            B2BucketObject result = await _b2Client.Communicator.DeleteBucket(_bucket.AccountId, _bucket.BucketId);
             State = B2BucketState.Deleted;
 
             _b2Client.BucketCache.RemoveBucket(_bucket);
@@ -48,7 +48,7 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2BucketState.Present);
 
-            B2BucketObject result = await _b2Client.Communicator.UpdateBucket(_b2Client.ApiUrl, _bucket.AccountId, _bucket.BucketId, newType);
+            B2BucketObject result = await _b2Client.Communicator.UpdateBucket(_bucket.AccountId, _bucket.BucketId, newType);
 
             _bucket.BucketType = result.BucketType;
             return true;
@@ -58,7 +58,14 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2BucketState.Present);
 
-            return new B2File(_b2Client, _bucket.BucketId, newName);
+            return new B2File(_b2Client, _bucket.BucketId, newName, false);
+        }
+
+        public B2File CreateLargeFile(string newName)
+        {
+            ThrowIfNot(B2BucketState.Present);
+
+            return new B2File(_b2Client, _bucket.BucketId, newName, true);
         }
 
         public B2FilesIterator GetFiles()
@@ -79,9 +86,16 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2BucketState.Present);
 
-            B2FileBase result = await _b2Client.Communicator.HideFile(_b2Client.ApiUrl, _bucket.BucketId, fileName);
+            B2FileBase result = await _b2Client.Communicator.HideFile(_bucket.BucketId, fileName);
 
             return true;
+        }
+
+        public B2UnfinishedLargeFilesIterator GetUnfinishedLargeFiles()
+        {
+            ThrowIfNot(B2BucketState.Present);
+
+            return new B2UnfinishedLargeFilesIterator(_b2Client, _bucket.BucketId, null);
         }
     }
 }
