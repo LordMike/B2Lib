@@ -36,6 +36,7 @@ namespace B2Lib.Client
             _b2Client = b2Client;
             _file = new B2FileInfo
             {
+                Action = file.Action,
                 BucketId = file.BucketId,
                 AccountId = file.AccountId,
                 FileId = file.FileId,
@@ -46,7 +47,7 @@ namespace B2Lib.Client
             };
 
             State = B2FileState.Present;
-            InitLargeFile();
+            _partUploadConfigs = new ConcurrentBag<B2UploadPartConfiguration>();
         }
 
         internal B2File(B2Client b2Client, B2FileInfo file)
@@ -57,7 +58,7 @@ namespace B2Lib.Client
             State = B2FileState.Present;
 
             if (file.Action == B2FileAction.Start)
-                InitLargeFile();
+                _partUploadConfigs = new ConcurrentBag<B2UploadPartConfiguration>();
         }
 
         internal B2File(B2Client b2Client, string bucketId, string newName, bool isLargeFile)
@@ -65,6 +66,7 @@ namespace B2Lib.Client
             _b2Client = b2Client;
             _file = new B2FileInfo
             {
+                Action = B2FileAction.Upload,
                 FileName = newName,
                 BucketId = bucketId,
                 ContentType = "b2/x-auto"
@@ -72,13 +74,10 @@ namespace B2Lib.Client
 
             State = B2FileState.New;
             if (isLargeFile)
-                InitLargeFile();
-        }
-
-        private void InitLargeFile()
-        {
-            _file.Action = B2FileAction.Start;
-            _partUploadConfigs = new ConcurrentBag<B2UploadPartConfiguration>();
+            {
+                _file.Action = B2FileAction.Start;
+                _partUploadConfigs = new ConcurrentBag<B2UploadPartConfiguration>();
+            }
         }
 
         internal void ReturnUploadConfig(B2UploadPartConfiguration config)
@@ -117,7 +116,7 @@ namespace B2Lib.Client
         {
             if (Action == B2FileAction.Start && !requireLarge)
                 throw new InvalidOperationException($"The B2 File, {_file.FileName}, is a large file, and it can't be for this operation (id: {_file.FileId})");
-            if (!(Action == B2FileAction.Start) && requireLarge)
+            if (Action != B2FileAction.Start && requireLarge)
                 throw new InvalidOperationException($"The B2 File, {_file.FileName}, is not a large file, and it must be for this operation (id: {_file.FileId})");
         }
 
