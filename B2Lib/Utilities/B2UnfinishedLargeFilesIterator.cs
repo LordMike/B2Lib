@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using B2Lib.Client;
+using B2Lib.Enums;
 using B2Lib.Objects;
 
 namespace B2Lib.Utilities
@@ -28,13 +29,10 @@ namespace B2Lib.Utilities
 
             return result.Files.Select(s =>
             {
+                s.Action = B2FileAction.Start;
+
                 return new B2File(_client, s);
             }).ToList();
-        }
-
-        protected override void PreProcessItem(B2File item)
-        {
-
         }
     }
 }

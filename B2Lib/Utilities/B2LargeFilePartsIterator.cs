@@ -24,10 +24,5 @@ namespace B2Lib.Utilities
 
             return result.Parts;
         }
-
-        protected override void PreProcessItem(B2LargeFilePart item)
-        {
-
-        }
     }
 }

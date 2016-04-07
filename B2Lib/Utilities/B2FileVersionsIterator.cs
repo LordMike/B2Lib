@@ -37,9 +37,5 @@ namespace B2Lib.Utilities
                 return new B2File(_client, s);
             }).ToList();
         }
-
-        protected override void PreProcessItem(B2File item)
-        {
-        }
     }
 }

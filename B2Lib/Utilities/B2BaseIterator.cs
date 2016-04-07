@@ -17,8 +17,6 @@ namespace B2Lib.Utilities
 
         protected abstract List<T> GetNextPage(out bool isDone);
 
-        protected abstract void PreProcessItem(T item);
-
         public IEnumerator<T> GetEnumerator()
         {
             bool isDone;
@@ -27,11 +25,7 @@ namespace B2Lib.Utilities
                 List<T> page = GetNextPage(out isDone);
 
                 foreach (T item in page)
-                {
-                    PreProcessItem(item);
-
                     yield return item;
-                }
 
                 if (!page.Any())
                     yield break;
