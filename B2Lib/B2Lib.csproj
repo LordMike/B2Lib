@@ -56,6 +56,8 @@
     <Compile Include="Client\B2Client.cs" />
     <Compile Include="Client\B2File.cs" />
     <Compile Include="Client\B2FileState.cs" />
+    <Compile Include="Client\B2LargeFile.cs" />
+    <Compile Include="Client\B2LargeFileState.cs" />
     <Compile Include="Objects\B2CanceledLargeFile.cs" />
     <Compile Include="Objects\B2DownloadResult.cs" />
     <Compile Include="Objects\B2LargeFilePart.cs" />
@@ -64,6 +66,7 @@
     <Compile Include="Objects\B2UnfinishedLargeFilesContainer.cs" />
     <Compile Include="Objects\B2UploadPartConfiguration.cs" />
     <Compile Include="Utilities\B2BaseIterator.cs" />
+    <Compile Include="Utilities\B2Constants.cs" />
     <Compile Include="Utilities\B2FilesIterator.cs" />
     <Compile Include="Utilities\B2FileVersionsIterator.cs" />
     <Compile Include="Utilities\B2LargeFilePartsIterator.cs" />

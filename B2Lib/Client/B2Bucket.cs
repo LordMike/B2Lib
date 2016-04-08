@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using B2Lib.Enums;
 using B2Lib.Objects;
@@ -58,14 +59,16 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2BucketState.Present);
 
-            return new B2File(_b2Client, _bucket.BucketId, newName, false);
+            return new B2File(_b2Client, _bucket.BucketId, newName);
         }
 
-        public B2File CreateLargeFile(string newName)
+        public async Task<B2LargeFile> CreateLargeFileAsync(string newName, string contentType = null, Dictionary<string, string> fileInfo = null)
         {
             ThrowIfNot(B2BucketState.Present);
 
-            return new B2File(_b2Client, _bucket.BucketId, newName, true);
+            B2UnfinishedLargeFile result = await _b2Client.Communicator.StartLargeFileUpload(_bucket.BucketId, newName, contentType, fileInfo);
+
+            return new B2LargeFile(_b2Client, result);
         }
 
         public B2FilesIterator GetFiles()
