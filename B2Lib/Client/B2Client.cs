@@ -175,18 +175,20 @@ namespace B2Lib.Client
         {
             ThrowExceptionIfNotAuthorized();
 
-            IEnumerable<B2Bucket> buckets = await GetBucketsAsync();
-
-            return buckets.FirstOrDefault(s => s.BucketName.Equals(name));
+            if (BucketCache.GetByName(name) == null)
+                await GetBucketsAsync();
+            
+            return new B2Bucket(this, BucketCache.GetByName(name));
         }
 
         public async Task<B2Bucket> GetBucketByIdAsync(string id)
         {
             ThrowExceptionIfNotAuthorized();
 
-            IEnumerable<B2Bucket> buckets = await GetBucketsAsync();
+            if (BucketCache.GetById(id) == null)
+                await GetBucketsAsync();
 
-            return buckets.FirstOrDefault(s => s.BucketId.Equals(id));
+            return new B2Bucket(this, BucketCache.GetById(id));
         }
     }
 }

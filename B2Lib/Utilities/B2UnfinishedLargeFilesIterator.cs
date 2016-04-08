@@ -17,6 +17,9 @@ namespace B2Lib.Utilities
             _client = client;
             _bucketId = bucketId;
             _currentStartFileId = startFileId;
+
+            // TODO: Once B2 allows larger pages, use that number by default
+            PageSize = 100;
         }
 
         protected override List<B2LargeFile> GetNextPage(out bool isDone)

@@ -71,18 +71,25 @@ namespace B2Lib.Client
             return new B2LargeFile(_b2Client, result);
         }
 
-        public B2FilesIterator GetFiles()
+        public B2FilesIterator GetFiles(string startFileName = null)
         {
             ThrowIfNot(B2BucketState.Present);
 
-            return new B2FilesIterator(_b2Client, _bucket.BucketId, null);
+            return new B2FilesIterator(_b2Client, _bucket.BucketId, startFileName);
         }
 
-        public B2FileVersionsIterator GetFileVersions()
+        public B2FileVersionsIterator GetFileVersions(string startFileName = null, string startFileId = null)
         {
             ThrowIfNot(B2BucketState.Present);
 
-            return new B2FileVersionsIterator(_b2Client, _bucket.BucketId, null, null);
+            return new B2FileVersionsIterator(_b2Client, _bucket.BucketId, startFileName, startFileId);
+        }
+
+        public B2UnfinishedLargeFilesIterator GetUnfinishedLargeFiles(string startFileId = null)
+        {
+            ThrowIfNot(B2BucketState.Present);
+
+            return new B2UnfinishedLargeFilesIterator(_b2Client, _bucket.BucketId, startFileId);
         }
 
         public async Task<bool> HideFileAsync(string fileName)
@@ -92,13 +99,6 @@ namespace B2Lib.Client
             B2FileBase result = await _b2Client.Communicator.HideFile(_bucket.BucketId, fileName);
 
             return true;
-        }
-
-        public B2UnfinishedLargeFilesIterator GetUnfinishedLargeFiles()
-        {
-            ThrowIfNot(B2BucketState.Present);
-
-            return new B2UnfinishedLargeFilesIterator(_b2Client, _bucket.BucketId, null);
         }
     }
 }

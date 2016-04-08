@@ -21,7 +21,7 @@ namespace B2Lib.SyncExtensions
             return Utility.AsyncRunHelper(() => bucket.HideFileAsync(fileName));
         }
 
-        public static B2LargeFile StartLargeFile(this B2Bucket bucket, string newName, string contentType, Dictionary<string, string> fileInfo)
+        public static B2LargeFile CreateLargeFile(this B2Bucket bucket, string newName, string contentType = null, Dictionary<string, string> fileInfo = null)
         {
             return Utility.AsyncRunHelper(() => bucket.CreateLargeFileAsync(newName, contentType, fileInfo));
         }

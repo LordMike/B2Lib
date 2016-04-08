@@ -9,23 +9,23 @@ using B2Lib.Utilities;
 
 namespace B2Lib.Client
 {
-    public class B2File
+    public class B2File : B2FileItemBase
     {
         private readonly B2Client _b2Client;
         private B2FileInfo _file;
 
         public B2FileState State { get; private set; }
 
+        public override string FileId => _file.FileId;
+        public override string FileName => _file.FileName;
+        public override DateTime UploadTimestamp => _file.UploadTimestamp;
+        public override string AccountId => _file.AccountId;
+        public override string BucketId => _file.BucketId;
+        public override string ContentType => _file.ContentType;
+        public override Dictionary<string, string> FileInfo => _file.FileInfo;
         public B2FileAction Action => _file.Action;
-        public string FileId => _file.FileId;
-        public string FileName => _file.FileName;
-        public DateTime UploadTimestamp => _file.UploadTimestamp;
-        public string AccountId => _file.AccountId;
         public string ContentSha1 => _file.ContentSha1;
-        public string BucketId => _file.BucketId;
         public long ContentLength => _file.ContentLength;
-        public string ContentType => _file.ContentType;
-        public Dictionary<string, string> FileInfo => _file.FileInfo;
 
         internal B2File(B2Client b2Client, B2FileInfo file)
         {
@@ -174,7 +174,7 @@ namespace B2Lib.Client
             return this;
         }
 
-        public async Task<bool> DeleteAsync()
+        public override async Task<bool> DeleteAsync()
         {
             ThrowIfNot(B2FileState.Present);
 

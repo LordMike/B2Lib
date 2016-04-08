@@ -29,10 +29,5 @@ namespace B2Lib.SyncExtensions
         {
             return Utility.AsyncRunHelper(() => file.RefreshAsync());
         }
-
-        public static bool Delete(this B2File file)
-        {
-            return Utility.AsyncRunHelper(() => file.DeleteAsync());
-        }
     }
 }

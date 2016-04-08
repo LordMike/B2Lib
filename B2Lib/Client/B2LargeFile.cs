@@ -10,21 +10,21 @@ using B2Lib.Utilities;
 
 namespace B2Lib.Client
 {
-    public class B2LargeFile
+    public class B2LargeFile : B2FileItemBase
     {
         private readonly B2Client _b2Client;
         private readonly ConcurrentBag<B2UploadPartConfiguration> _partUploadConfigs;
-        private readonly B2UnfinishedLargeFile _file;
+        private B2UnfinishedLargeFile _file;
 
         public B2LargeFileState State { get; private set; }
 
-        public string FileId => _file.FileId;
-        public string FileName => _file.FileName;
-        public DateTime UploadTimestamp => _file.UploadTimestamp;
-        public string AccountId => _file.AccountId;
-        public string BucketId => _file.BucketId;
-        public string ContentType => _file.ContentType;
-        public Dictionary<string, string> FileInfo => _file.FileInfo;
+        public override string FileId => _file.FileId;
+        public override string FileName => _file.FileName;
+        public override DateTime UploadTimestamp => _file.UploadTimestamp;
+        public override string AccountId => _file.AccountId;
+        public override string BucketId => _file.BucketId;
+        public override string ContentType => _file.ContentType;
+        public override Dictionary<string, string> FileInfo => _file.FileInfo;
 
         internal B2LargeFile(B2Client b2Client, B2UnfinishedLargeFile file)
         {
@@ -32,6 +32,25 @@ namespace B2Lib.Client
             _b2Client = b2Client;
 
             _partUploadConfigs = new ConcurrentBag<B2UploadPartConfiguration>();
+            State = B2LargeFileState.New;
+        }
+
+        internal B2LargeFile(B2Client b2Client, B2FileInfo file)
+        {
+            _file = new B2UnfinishedLargeFile
+            {
+                AccountId = file.AccountId,
+                BucketId = file.BucketId,
+                FileName = file.FileName,
+                ContentType = file.ContentType,
+                FileId = file.FileId,
+                FileInfo = file.FileInfo,
+                UploadTimestamp = file.UploadTimestamp
+            };
+            _b2Client = b2Client;
+
+            _partUploadConfigs = new ConcurrentBag<B2UploadPartConfiguration>();
+            State = B2LargeFileState.New;
         }
 
         private void ThrowIfNot(B2LargeFileState desiredState)
@@ -111,6 +130,16 @@ namespace B2Lib.Client
             State = B2LargeFileState.Finished;
 
             return new B2File(_b2Client, result);
+        }
+        
+        public override async Task<bool> DeleteAsync()
+        {
+            ThrowIfNot(B2LargeFileState.New);
+
+            bool res = await _b2Client.Communicator.DeleteFile(_file.FileName, _file.FileId);
+            State = B2LargeFileState.Deleted;
+
+            return res;
         }
 
     }

@@ -4,6 +4,7 @@ namespace B2Lib.Enums
     {
         Unknown,
         New,
-        Finished
+        Finished,
+        Deleted
     }
 }

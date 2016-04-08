@@ -51,6 +51,7 @@
     <Compile Include="..\VersionInfo.cs">
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
+    <Compile Include="Client\B2FileItemBase.cs" />
     <Compile Include="Enums\B2BucketState.cs" />
     <Compile Include="Client\B2Bucket.cs" />
     <Compile Include="Client\B2Client.cs" />
