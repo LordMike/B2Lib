@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using B2Lib.Client;
 using B2Lib.Enums;
 using B2Lib.Exceptions;
-using B2Lib.Objects;
 using B2Lib.SyncExtensions;
 using B2Lib.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
