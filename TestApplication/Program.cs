@@ -34,27 +34,9 @@ namespace TestApplication
             string path = Path.GetTempFileName();
             File.WriteAllText(path, "Testworld".PadRight(2000, 'A'));
 
-            var res = client.UploadFile(bck, new FileInfo(path), "Testfile.txt");
-
-            return;
-
-            List<B2FileInfo> files = client.ListFileVersions(bck).ToList();
-            Console.WriteLine(files.Count);
-
-            Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 30 }, file =>
-            {
-                client.DeleteFile(file);
-            });
-
-            //client.UploadFile(bck, new FileInfo("state"), "state", new Dictionary<string, string> { { "test", "\"" } }).Wait();
-
-            files = client.ListFileVersions(bck).ToList();
-            Console.WriteLine(files.Count);
-
-
-            client.SaveState("state");
-
-            Console.WriteLine();
+            var res = bck.CreateFile("Testfile.txt");
+            
+            res.UploadFileData(new FileInfo(path));
         }
     }
 }
