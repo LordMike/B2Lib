@@ -25,5 +25,15 @@ namespace B2Lib.SyncExtensions
         {
             return Utility.AsyncRunHelper(() => bucket.CreateLargeFileAsync(newName, contentType, fileInfo));
         }
+
+        public static B2File GetFile(this B2Bucket bucket, string fileId)
+        {
+            return Utility.AsyncRunHelper(() => bucket.GetFileAsync(fileId));
+        }
+
+        public static B2LargeFile GetLargeFile(this B2Bucket bucket, string fileId)
+        {
+            return Utility.AsyncRunHelper(() => bucket.GetLargeFileAsync(fileId));
+        }
     }
 }

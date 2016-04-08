@@ -75,12 +75,12 @@
     <Compile Include="Utilities\UnixDateTimeConverter.cs" />
     <Compile Include="Utilities\B2BucketCacher.cs" />
     <Compile Include="Exceptions\B2AuthenticationException.cs" />
-    <Compile Include="Exceptions\B2AuthenticationResponse.cs" />
+    <Compile Include="Objects\B2AuthenticationResponse.cs" />
     <Compile Include="Objects\B2BucketObject.cs" />
     <Compile Include="Objects\B2BucketList.cs" />
     <Compile Include="Enums\B2BucketType.cs" />
     <Compile Include="B2Communicator.cs" />
-    <Compile Include="Exceptions\B2Error.cs" />
+    <Compile Include="Objects\B2Error.cs" />
     <Compile Include="Exceptions\B2Exception.cs" />
     <Compile Include="Enums\B2FileAction.cs" />
     <Compile Include="Objects\B2FileBase.cs" />

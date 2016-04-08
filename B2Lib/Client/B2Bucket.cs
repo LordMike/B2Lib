@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using B2Lib.Enums;
+using B2Lib.Exceptions;
 using B2Lib.Objects;
 using B2Lib.Utilities;
 
@@ -69,6 +73,32 @@ namespace B2Lib.Client
             B2UnfinishedLargeFile result = await _b2Client.Communicator.StartLargeFileUpload(_bucket.BucketId, newName, contentType, fileInfo);
 
             return new B2LargeFile(_b2Client, result);
+        }
+
+        public async Task<B2File> GetFileAsync(string fileId)
+        {
+            ThrowIfNot(B2BucketState.Present);
+
+            B2FileInfo info = await _b2Client.Communicator.GetFileInfo(fileId);
+
+            return new B2File(_b2Client, info);
+        }
+
+        public async Task<B2LargeFile> GetLargeFileAsync(string fileId)
+        {
+            ThrowIfNot(B2BucketState.Present);
+
+            B2UnfinishedLargeFilesIterator iterator = new B2UnfinishedLargeFilesIterator(_b2Client, BucketId, fileId)
+            {
+                PageSize = 1
+            };
+
+            B2LargeFile largeFile = await Task.Run(() => iterator.FirstOrDefault());
+
+            if (largeFile == null)
+                throw new B2Exception("file_state_none") { ErrorCode = "not_found", HttpStatusCode = HttpStatusCode.NotFound };
+
+            return largeFile;
         }
 
         public B2FilesIterator GetFiles(string startFileName = null)

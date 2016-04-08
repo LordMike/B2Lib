@@ -59,6 +59,24 @@ namespace B2Lib.Tests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(B2Exception))]
+        public void GetMissingFile()
+        {
+            B2File res = _bucket.GetFile("4_z4b156694d986f47c54320610_f200866faa871bf5f_d20160408_m223411_c001_v0001022_t0052");
+
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(B2Exception))]
+        public void GetMissingLargeFile()
+        {
+            B2LargeFile res = _bucket.GetLargeFile("4_z4b156694d986f47c54320610_f200866faa871bf5f_d20160408_m223411_c001_v0001022_t0052");
+
+            Assert.Fail();
+        }
+
+        [TestMethod]
         public void ListMultiplePages()
         {
             File.WriteAllText(_tmpPath, "Testworld,123");
