@@ -1,4 +1,4 @@
-namespace B2Lib.Client
+namespace B2Lib.Enums
 {
     public enum B2LargeFileState
     {

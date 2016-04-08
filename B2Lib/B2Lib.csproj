@@ -51,13 +51,13 @@
     <Compile Include="..\VersionInfo.cs">
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
-    <Compile Include="Client\B2BucketState.cs" />
+    <Compile Include="Enums\B2BucketState.cs" />
     <Compile Include="Client\B2Bucket.cs" />
     <Compile Include="Client\B2Client.cs" />
     <Compile Include="Client\B2File.cs" />
-    <Compile Include="Client\B2FileState.cs" />
+    <Compile Include="Enums\B2FileState.cs" />
     <Compile Include="Client\B2LargeFile.cs" />
-    <Compile Include="Client\B2LargeFileState.cs" />
+    <Compile Include="Enums\B2LargeFileState.cs" />
     <Compile Include="Objects\B2CanceledLargeFile.cs" />
     <Compile Include="Objects\B2DownloadResult.cs" />
     <Compile Include="Objects\B2LargeFilePart.cs" />
