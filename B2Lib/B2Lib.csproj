@@ -76,7 +76,6 @@
     <Compile Include="Exceptions\B2AuthenticationException.cs" />
     <Compile Include="Exceptions\B2AuthenticationResponse.cs" />
     <Compile Include="Objects\B2BucketObject.cs" />
-    <Compile Include="Objects\B2BucketCache.cs" />
     <Compile Include="Objects\B2BucketList.cs" />
     <Compile Include="Enums\B2BucketType.cs" />
     <Compile Include="B2Communicator.cs" />

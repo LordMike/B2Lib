@@ -6,42 +6,42 @@ namespace B2Lib.Utilities
 {
     public class B2BucketCacher
     {
-        private List<B2BucketCache> _cache;
+        private readonly List<B2BucketObject> _cache;
 
         public B2BucketCacher()
         {
-            _cache = new List<B2BucketCache>();
+            _cache = new List<B2BucketObject>();
         }
 
-        public List<B2BucketCache> GetState()
+        public List<B2BucketObject> GetState()
         {
             lock (_cache)
-                return new List<B2BucketCache>(_cache.Select(s => s.CreateCopy()));
+                return new List<B2BucketObject>(_cache);
         }
 
-        public void LoadState(List<B2BucketCache> state)
+        public void LoadState(List<B2BucketObject> state)
         {
             lock (_cache)
                 _cache.AddRange(state);
         }
 
-        public B2BucketCache GetById(string id)
+        public B2BucketObject GetById(string id)
         {
             return GetById(id, false);
         }
 
-        private B2BucketCache GetById(string id, bool create)
+        private B2BucketObject GetById(string id, bool create)
         {
             lock (_cache)
             {
-                B2BucketCache item = _cache.SingleOrDefault(s => s.BucketId == id);
+                B2BucketObject item = _cache.SingleOrDefault(s => s.BucketId == id);
                 if (item == null && create)
-                    _cache.Add(item = new B2BucketCache { BucketId = id });
+                    _cache.Add(item = new B2BucketObject { BucketId = id });
                 return item;
             }
         }
 
-        public B2BucketCache GetByName(string name)
+        public B2BucketObject GetByName(string name)
         {
             lock (_cache)
                 return _cache.SingleOrDefault(s => s.BucketName == name);
@@ -53,16 +53,16 @@ namespace B2Lib.Utilities
                 RecordBucket(bucket);
         }
 
-        public B2BucketCache RecordBucket(B2BucketObject bucket)
+        public B2BucketObject RecordBucket(B2BucketObject bucket)
         {
-            B2BucketCache item = GetById(bucket.BucketId, true);
+            B2BucketObject item = GetById(bucket.BucketId, true);
 
             item.BucketId = bucket.BucketId;
             item.BucketName = bucket.BucketName;
 
             return item;
         }
-        
+
         public void RemoveBucket(B2BucketObject bucket)
         {
             lock (_cache)
