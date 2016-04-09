@@ -192,39 +192,38 @@ namespace B2Lib.Tests
             File.WriteAllText(_tmpPath, "Testworld,123");
 
             // Upload it 
-            B2File file = _bucket.CreateFile("test").UploadFileData(new FileInfo(_tmpPath));
-            TestFileContents(file);
+            B2File originalFile = _bucket.CreateFile("test").UploadFileData(new FileInfo(_tmpPath));
+            TestFileContents(originalFile);
 
             // Enumerate it
             List<B2File> list = _bucket.GetFiles().ToList();
-            B2File listFile = list.FirstOrDefault(s => s.FileId == file.FileId);
+            B2File listFile = list.FirstOrDefault(s => s.FileId == originalFile.FileId);
 
             TestFileContents(listFile, B2FileAction.Upload);
 
             // Hide it
-            _bucket.HideFile(listFile.FileName);
-            B2File hideFileItem = _bucket.GetFiles().FirstOrDefault(s => s.FileName.Equals(listFile.FileName));
+            _bucket.HideFile(originalFile.FileName);
 
             // Enumerate it (it should now be hidden)
             list = _bucket.GetFiles().ToList();
-            listFile = list.FirstOrDefault(s => s.FileId == file.FileId);
+            listFile = list.FirstOrDefault(s => s.FileId == originalFile.FileId);
 
             Assert.IsNull(listFile);
 
             // Enumerate versions (it should be visible)
             List<B2FileItemBase> versions = _bucket.GetFileVersions().ToList();
-            B2File hideFile = versions.OfType<B2File>().FirstOrDefault(s => s.FileId == hideFileItem.FileId);
-            listFile = versions.OfType<B2File>().FirstOrDefault(s => s.FileId == file.FileId);
+            B2File hideFile = versions.OfType<B2File>().FirstOrDefault(s => s.FileName == originalFile.FileName && s.Action == B2FileAction.Hide);
+            listFile = versions.OfType<B2File>().FirstOrDefault(s => s.FileId == originalFile.FileId);
 
             TestFileContents(hideFile, B2FileAction.Hide);
             TestFileContents(listFile, B2FileAction.Upload);
 
             // Delete file
-            file.Delete();
+            originalFile.Delete();
 
             // Ensure list is blank
-            List<B2File> blankFilesList = _bucket.GetFiles().ToList();
-            Assert.IsFalse(blankFilesList.Any(s => s.FileId == file.FileId));
+            List<B2FileItemBase> blankFilesList = _bucket.GetFileVersions().ToList();
+            Assert.IsFalse(blankFilesList.Any(s => s.FileId == originalFile.FileId));
         }
 
         [TestMethod]
