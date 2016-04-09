@@ -111,7 +111,7 @@ namespace B2Lib.Client
             }
             finally
             {
-                _b2Client.ReturnUploadConfig(_file.BucketId, config);
+                _b2Client.ReturnUploadConfig(config);
             }
 
             return this;
@@ -134,7 +134,7 @@ namespace B2Lib.Client
             }
             finally
             {
-                _b2Client.ReturnUploadConfig(_file.BucketId, config);
+                _b2Client.ReturnUploadConfig(config);
             }
 
             return this;

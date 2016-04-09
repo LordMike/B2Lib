@@ -13,7 +13,6 @@ namespace B2Lib.Client
     public class B2LargeFile : B2FileItemBase
     {
         private readonly B2Client _b2Client;
-        private readonly ConcurrentBag<B2UploadPartConfiguration> _partUploadConfigs;
         private B2UnfinishedLargeFile _file;
 
         public B2LargeFileState State { get; private set; }
@@ -31,7 +30,6 @@ namespace B2Lib.Client
             _file = file;
             _b2Client = b2Client;
 
-            _partUploadConfigs = new ConcurrentBag<B2UploadPartConfiguration>();
             State = B2LargeFileState.New;
         }
 
@@ -49,7 +47,6 @@ namespace B2Lib.Client
             };
             _b2Client = b2Client;
 
-            _partUploadConfigs = new ConcurrentBag<B2UploadPartConfiguration>();
             State = B2LargeFileState.New;
         }
 
@@ -57,32 +54,6 @@ namespace B2Lib.Client
         {
             if (State != desiredState)
                 throw new InvalidOperationException($"The B2 Large File, {_file.FileName}, was {State} and not {desiredState} (id: {_file.FileId})");
-        }
-
-        private void ReturnUploadConfig(B2UploadPartConfiguration config)
-        {
-            _partUploadConfigs.Add(config);
-        }
-
-        private B2UploadPartConfiguration FetchUploadConfig()
-        {
-            B2UploadPartConfiguration config;
-            if (_partUploadConfigs.TryTake(out config))
-                return config;
-
-            // Create new config
-            B2UploadPartConfiguration res;
-            try
-            {
-                res = _b2Client.Communicator.GetPartUploadUrl(_file.FileId).Result;
-            }
-            catch (AggregateException ex)
-            {
-                // Re-throw the inner exception
-                throw ex.InnerException;
-            }
-
-            return res;
         }
 
         private B2LargeFilePartsIterator GetParts()
@@ -96,7 +67,7 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2LargeFileState.New);
 
-            B2UploadPartConfiguration config = FetchUploadConfig();
+            B2UploadPartConfiguration config = _b2Client.FetchLargeFileUploadConfig(FileId);
 
             try
             {
@@ -107,7 +78,7 @@ namespace B2Lib.Client
             }
             finally
             {
-                ReturnUploadConfig(config);
+                _b2Client.ReturnUploadConfig(config);
             }
         }
 
@@ -119,25 +90,34 @@ namespace B2Lib.Client
             List<string> partHashes = GetParts().OrderBy(s => s.PartNumber).Select(s => s.ContentSha1).ToList();
 
             // Use the parts hashes to complete the file. Note we automatically accept any errors in transfer.
-            return await FinishAsync(partHashes);
+            B2File result = await FinishAsync(partHashes);
+
+            _b2Client.MarkLargeFileDone(FileId);
+
+            return result;
         }
 
         public async Task<B2File> FinishAsync(List<string> sha1Hashes)
         {
-            // TODO: Determine if the file is finished already?
+            ThrowIfNot(B2LargeFileState.New);
+
             B2FileInfo result = await _b2Client.Communicator.FinishLargeFileUpload(_file.FileId, sha1Hashes);
 
             State = B2LargeFileState.Finished;
 
+            _b2Client.MarkLargeFileDone(FileId);
+
             return new B2File(_b2Client, result);
         }
-        
+
         public override async Task<bool> DeleteAsync()
         {
             ThrowIfNot(B2LargeFileState.New);
 
             bool res = await _b2Client.Communicator.DeleteFile(_file.FileName, _file.FileId);
             State = B2LargeFileState.Deleted;
+
+            _b2Client.MarkLargeFileDone(FileId);
 
             return res;
         }

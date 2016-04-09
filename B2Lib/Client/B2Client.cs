@@ -23,7 +23,9 @@ namespace B2Lib.Client
         public string AccountId { get; private set; }
         public long MinimumPartSize { get; set; }
 
-        private readonly ConcurrentDictionary<string, ConcurrentBag<B2UploadConfiguration>> _bucketUploadUrls;
+        private readonly ConcurrentDictionary<string, ConcurrentBag<B2UploadConfiguration>> _uploadConfigsByBucket;
+
+        private readonly ConcurrentDictionary<string, ConcurrentBag<B2UploadPartConfiguration>> _uploadConfigsByLargeFile;
 
         internal B2BucketCacher BucketCache { get; private set; }
         internal B2Communicator Communicator { get; private set; }
@@ -54,7 +56,9 @@ namespace B2Lib.Client
 
         public B2Client()
         {
-            _bucketUploadUrls = new ConcurrentDictionary<string, ConcurrentBag<B2UploadConfiguration>>();
+            _uploadConfigsByBucket = new ConcurrentDictionary<string, ConcurrentBag<B2UploadConfiguration>>();
+            _uploadConfigsByLargeFile = new ConcurrentDictionary<string, ConcurrentBag<B2UploadPartConfiguration>>();
+
             BucketCache = new B2BucketCacher();
             Communicator = new B2Communicator();
         }
@@ -107,16 +111,23 @@ namespace B2Lib.Client
                 throw new B2MissingAuthenticationException("You must call Login() or LoadState() first");
         }
 
-        internal void ReturnUploadConfig(string bucketId, B2UploadConfiguration config)
+        internal void ReturnUploadConfig(B2UploadConfiguration config)
         {
-            ConcurrentBag<B2UploadConfiguration> bag = _bucketUploadUrls.GetOrAdd(bucketId, s => new ConcurrentBag<B2UploadConfiguration>());
+            ConcurrentBag<B2UploadConfiguration> bag = _uploadConfigsByBucket.GetOrAdd(config.BucketId, s => new ConcurrentBag<B2UploadConfiguration>());
+
+            bag.Add(config);
+        }
+
+        internal void ReturnUploadConfig(B2UploadPartConfiguration config)
+        {
+            ConcurrentBag<B2UploadPartConfiguration> bag = _uploadConfigsByLargeFile.GetOrAdd(config.FileId, s => new ConcurrentBag<B2UploadPartConfiguration>());
 
             bag.Add(config);
         }
 
         internal B2UploadConfiguration FetchUploadConfig(string bucketId)
         {
-            ConcurrentBag<B2UploadConfiguration> bag = _bucketUploadUrls.GetOrAdd(bucketId, s => new ConcurrentBag<B2UploadConfiguration>());
+            ConcurrentBag<B2UploadConfiguration> bag = _uploadConfigsByBucket.GetOrAdd(bucketId, s => new ConcurrentBag<B2UploadConfiguration>());
 
             B2UploadConfiguration config;
             if (bag.TryTake(out config))
@@ -135,6 +146,35 @@ namespace B2Lib.Client
             }
 
             return res;
+        }
+
+        internal B2UploadPartConfiguration FetchLargeFileUploadConfig(string fileId)
+        {
+            ConcurrentBag<B2UploadPartConfiguration> bag = _uploadConfigsByLargeFile.GetOrAdd(fileId, s => new ConcurrentBag<B2UploadPartConfiguration>());
+
+            B2UploadPartConfiguration config;
+            if (bag.TryTake(out config))
+                return config;
+
+            // Create new config
+            B2UploadPartConfiguration res;
+            try
+            {
+                res = Communicator.GetPartUploadUrl(fileId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                // Re-throw the inner exception
+                throw ex.InnerException;
+            }
+
+            return res;
+        }
+
+        internal void MarkLargeFileDone(string fileId)
+        {
+            ConcurrentBag<B2UploadPartConfiguration> bag;
+            _uploadConfigsByLargeFile.TryRemove(fileId, out bag);
         }
 
         public async Task LoginAsync(string accountId, string applicationKey)
@@ -177,7 +217,7 @@ namespace B2Lib.Client
 
             if (BucketCache.GetByName(name) == null)
                 await GetBucketsAsync();
-            
+
             return new B2Bucket(this, BucketCache.GetByName(name));
         }
 
