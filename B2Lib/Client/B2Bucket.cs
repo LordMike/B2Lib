@@ -14,7 +14,7 @@ namespace B2Lib.Client
     public class B2Bucket
     {
         private readonly B2Client _b2Client;
-        private readonly B2BucketObject _bucket;
+        private B2BucketObject _bucket;
 
         public string BucketId => _bucket.BucketId;
         public string AccountId => _bucket.AccountId;
@@ -34,17 +34,18 @@ namespace B2Lib.Client
         private void ThrowIfNot(B2BucketState desiredState)
         {
             if (State != desiredState)
-                throw new InvalidOperationException($"The B2 Bucket, {_bucket.BucketName}, was {State} and not {desiredState} (id: {_bucket.BucketId})");
+                throw new InvalidOperationException($"The B2 Bucket, {BucketName}, was {State} and not {desiredState} (id: {BucketId})");
         }
 
         public async Task<bool> DeleteAsync()
         {
             ThrowIfNot(B2BucketState.Present);
 
-            B2BucketObject result = await _b2Client.Communicator.DeleteBucket(_bucket.AccountId, _bucket.BucketId);
+            B2BucketObject result = await _b2Client.Communicator.DeleteBucket(AccountId, BucketId);
             State = B2BucketState.Deleted;
 
             _b2Client.BucketCache.RemoveBucket(_bucket);
+            _bucket = result;
 
             return true;
         }
@@ -53,9 +54,9 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2BucketState.Present);
 
-            B2BucketObject result = await _b2Client.Communicator.UpdateBucket(_bucket.AccountId, _bucket.BucketId, newType);
+            B2BucketObject result = await _b2Client.Communicator.UpdateBucket(AccountId, BucketId, newType);
+            _bucket = result;
 
-            _bucket.BucketType = result.BucketType;
             return true;
         }
 
@@ -63,14 +64,14 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2BucketState.Present);
 
-            return new B2File(_b2Client, _bucket.BucketId, newName);
+            return new B2File(_b2Client, BucketId, newName);
         }
 
         public async Task<B2LargeFile> CreateLargeFileAsync(string newName, string contentType = null, Dictionary<string, string> fileInfo = null)
         {
             ThrowIfNot(B2BucketState.Present);
 
-            B2UnfinishedLargeFile result = await _b2Client.Communicator.StartLargeFileUpload(_bucket.BucketId, newName, contentType, fileInfo);
+            B2UnfinishedLargeFile result = await _b2Client.Communicator.StartLargeFileUpload(BucketId, newName, contentType, fileInfo);
 
             return new B2LargeFile(_b2Client, result);
         }
@@ -105,28 +106,28 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2BucketState.Present);
 
-            return new B2FilesIterator(_b2Client, _bucket.BucketId, startFileName);
+            return new B2FilesIterator(_b2Client, BucketId, startFileName);
         }
 
         public B2FileVersionsIterator GetFileVersions(string startFileName = null, string startFileId = null)
         {
             ThrowIfNot(B2BucketState.Present);
 
-            return new B2FileVersionsIterator(_b2Client, _bucket.BucketId, startFileName, startFileId);
+            return new B2FileVersionsIterator(_b2Client, BucketId, startFileName, startFileId);
         }
 
         public B2UnfinishedLargeFilesIterator GetUnfinishedLargeFiles(string startFileId = null)
         {
             ThrowIfNot(B2BucketState.Present);
 
-            return new B2UnfinishedLargeFilesIterator(_b2Client, _bucket.BucketId, startFileId);
+            return new B2UnfinishedLargeFilesIterator(_b2Client, BucketId, startFileId);
         }
 
         public async Task<bool> HideFileAsync(string fileName)
         {
             ThrowIfNot(B2BucketState.Present);
 
-            B2FileBase result = await _b2Client.Communicator.HideFile(_bucket.BucketId, fileName);
+            B2FileBase result = await _b2Client.Communicator.HideFile(BucketId, fileName);
 
             return true;
         }

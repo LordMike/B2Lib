@@ -52,7 +52,7 @@ namespace B2Lib.Client
         private void ThrowIfNot(B2FileState desiredState)
         {
             if (State != desiredState)
-                throw new InvalidOperationException($"The B2 File, {_file.FileName}, was {State} and not {desiredState} (id: {_file.FileId})");
+                throw new InvalidOperationException($"The B2 File, {FileName}, was {State} and not {desiredState} (id: {FileId})");
         }
 
         public B2File SetUploadContentType(string contentType)
@@ -89,7 +89,7 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2FileState.New);
 
-            B2UploadConfiguration config = _b2Client.FetchUploadConfig(_file.BucketId);
+            B2UploadConfiguration config = _b2Client.FetchUploadConfig(BucketId);
             try
             {
                 using (var fs = file.OpenRead())
@@ -100,7 +100,7 @@ namespace B2Lib.Client
 
                     fs.Seek(0, SeekOrigin.Begin);
 
-                    B2FileInfo result = await _b2Client.Communicator.UploadFile(config.UploadUrl, config.AuthorizationToken, fs, sha1Hash, _file.FileName, _file.ContentType, _file.FileInfo, null);
+                    B2FileInfo result = await _b2Client.Communicator.UploadFile(config.UploadUrl, config.AuthorizationToken, fs, sha1Hash, FileName, ContentType, FileInfo, null);
 
                     if (result.ContentSha1 != sha1Hash)
                         throw new ArgumentException("Bad transfer - hash mismatch");
@@ -121,12 +121,12 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2FileState.New);
 
-            B2UploadConfiguration config = _b2Client.FetchUploadConfig(_file.BucketId);
+            B2UploadConfiguration config = _b2Client.FetchUploadConfig(BucketId);
             try
             {
-                B2FileInfo result = await _b2Client.Communicator.UploadFile(config.UploadUrl, config.AuthorizationToken, source, _file.ContentSha1, _file.FileName, _file.ContentType, _file.FileInfo, null);
+                B2FileInfo result = await _b2Client.Communicator.UploadFile(config.UploadUrl, config.AuthorizationToken, source, ContentSha1, FileName, ContentType, FileInfo, null);
 
-                if (result.ContentSha1 != _file.ContentSha1)
+                if (result.ContentSha1 != ContentSha1)
                     throw new ArgumentException("Bad transfer - hash mismatch");
 
                 _file = result;
@@ -147,7 +147,7 @@ namespace B2Lib.Client
             if (Action != B2FileAction.Upload)
                 throw new InvalidOperationException("This file is not a file - it's most likely a 'hide' placeholder");
 
-            B2DownloadResult res = await _b2Client.Communicator.DownloadFileContent(_file.FileId);
+            B2DownloadResult res = await _b2Client.Communicator.DownloadFileContent(FileId);
 
             return res.Stream;
         }
@@ -160,14 +160,14 @@ namespace B2Lib.Client
             //if (Action != B2FileAction.Upload)
             //    throw new InvalidOperationException("This file is not a file - it's most likely a 'hide' placeholder");
 
-            //B2DownloadResult res = await _b2Client.Communicator.DownloadFileContent(_b2Client.DownloadUrl, _file.FileId);
+            //B2DownloadResult res = await _b2Client.Communicator.DownloadFileContent(_b2Client.DownloadUrl, FileId);
 
             //return res.Stream;
         }
 
         public async Task<B2File> RefreshAsync()
         {
-            B2FileInfo info = await _b2Client.Communicator.GetFileInfo(_file.FileId);
+            B2FileInfo info = await _b2Client.Communicator.GetFileInfo(FileId);
 
             _file = info;
 
@@ -178,7 +178,7 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2FileState.Present);
 
-            bool res = await _b2Client.Communicator.DeleteFile(_file.FileName, _file.FileId);
+            bool res = await _b2Client.Communicator.DeleteFile(FileName, FileId);
             State = B2FileState.Deleted;
 
             return res;

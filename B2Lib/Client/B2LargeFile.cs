@@ -53,14 +53,14 @@ namespace B2Lib.Client
         private void ThrowIfNot(B2LargeFileState desiredState)
         {
             if (State != desiredState)
-                throw new InvalidOperationException($"The B2 Large File, {_file.FileName}, was {State} and not {desiredState} (id: {_file.FileId})");
+                throw new InvalidOperationException($"The B2 Large File, {FileName}, was {State} and not {desiredState} (id: {FileId})");
         }
 
         private B2LargeFilePartsIterator GetParts()
         {
             ThrowIfNot(B2LargeFileState.New);
 
-            return new B2LargeFilePartsIterator(_b2Client.Communicator, _file.FileId);
+            return new B2LargeFilePartsIterator(_b2Client.Communicator, FileId);
         }
 
         public async Task UploadPartAsync(int partNumber, Stream source, string sha1Hash)
@@ -101,7 +101,7 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2LargeFileState.New);
 
-            B2FileInfo result = await _b2Client.Communicator.FinishLargeFileUpload(_file.FileId, sha1Hashes);
+            B2FileInfo result = await _b2Client.Communicator.FinishLargeFileUpload(FileId, sha1Hashes);
 
             State = B2LargeFileState.Finished;
 
@@ -114,7 +114,7 @@ namespace B2Lib.Client
         {
             ThrowIfNot(B2LargeFileState.New);
 
-            bool res = await _b2Client.Communicator.DeleteFile(_file.FileName, _file.FileId);
+            bool res = await _b2Client.Communicator.DeleteFile(FileName, FileId);
             State = B2LargeFileState.Deleted;
 
             _b2Client.MarkLargeFileDone(FileId);
