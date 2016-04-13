@@ -8,6 +8,9 @@ namespace B2Lib.Enums
         AllPrivate,
 
         [Description("allPublic")]
-        AllPublic
+        AllPublic,
+
+        [Description("snapshot")]
+        Snapshot
     }
 }
