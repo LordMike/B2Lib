@@ -8,7 +8,7 @@ namespace B2Lib.Utilities
         private readonly string _fileId;
         private int _currentStartPartNumber;
 
-        internal B2LargeFilePartsIterator(B2Communicator communicator, string fileId, int startNumber)
+        internal B2LargeFilePartsIterator(B2Communicator communicator, string fileId, int startNumber = 1)
             : base(communicator)
         {
             _fileId = fileId;

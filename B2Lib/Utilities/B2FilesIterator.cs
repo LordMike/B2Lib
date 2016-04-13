@@ -9,22 +9,22 @@ namespace B2Lib.Utilities
     {
         private readonly B2Client _client;
         private readonly string _bucketId;
-        private string _currentStart;
+        private string _currentStartFile;
 
-        internal B2FilesIterator(B2Client client, string bucketId, string startName) :
-            base(client.Communicator)
+        internal B2FilesIterator(B2Client client, string bucketId, string startFileName)
+            : base(client.Communicator)
         {
             _client = client;
             _bucketId = bucketId;
-            _currentStart = startName;
+            _currentStartFile = startFileName;
         }
 
         protected override List<B2File> GetNextPage(out bool isDone)
         {
-            B2FileListContainer result = Communicator.ListFiles(_bucketId, _currentStart, PageSize).Result;
-            _currentStart = result.NextFileName;
+            B2FileListContainer result = Communicator.ListFiles(_bucketId, _currentStartFile, PageSize).Result;
+            _currentStartFile = result.NextFileName;
 
-            isDone = _currentStart == null;
+            isDone = _currentStartFile == null;
 
             return result.Files.Select(s =>
             {

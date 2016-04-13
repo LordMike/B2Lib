@@ -46,6 +46,8 @@
     <Compile Include="B2BucketExtensions.cs" />
     <Compile Include="B2ClientExtensions.cs" />
     <Compile Include="B2FileExtensions.cs" />
+    <Compile Include="B2FileItemBaseExtensions.cs" />
+    <Compile Include="B2LargeFileExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
@@ -54,6 +56,9 @@
       <Project>{611d9b5b-8ae1-4137-b1d4-9fbf996f704e}</Project>
       <Name>B2Lib</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

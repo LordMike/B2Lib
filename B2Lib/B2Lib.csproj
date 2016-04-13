@@ -36,7 +36,10 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -48,11 +51,14 @@
     <Compile Include="..\VersionInfo.cs">
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
-    <Compile Include="Client\B2BucketState.cs" />
+    <Compile Include="Client\B2FileItemBase.cs" />
+    <Compile Include="Enums\B2BucketState.cs" />
     <Compile Include="Client\B2Bucket.cs" />
     <Compile Include="Client\B2Client.cs" />
     <Compile Include="Client\B2File.cs" />
-    <Compile Include="Client\B2FileState.cs" />
+    <Compile Include="Enums\B2FileState.cs" />
+    <Compile Include="Client\B2LargeFile.cs" />
+    <Compile Include="Enums\B2LargeFileState.cs" />
     <Compile Include="Objects\B2CanceledLargeFile.cs" />
     <Compile Include="Objects\B2DownloadResult.cs" />
     <Compile Include="Objects\B2LargeFilePart.cs" />
@@ -61,6 +67,7 @@
     <Compile Include="Objects\B2UnfinishedLargeFilesContainer.cs" />
     <Compile Include="Objects\B2UploadPartConfiguration.cs" />
     <Compile Include="Utilities\B2BaseIterator.cs" />
+    <Compile Include="Utilities\B2Constants.cs" />
     <Compile Include="Utilities\B2FilesIterator.cs" />
     <Compile Include="Utilities\B2FileVersionsIterator.cs" />
     <Compile Include="Utilities\B2LargeFilePartsIterator.cs" />
@@ -68,13 +75,12 @@
     <Compile Include="Utilities\UnixDateTimeConverter.cs" />
     <Compile Include="Utilities\B2BucketCacher.cs" />
     <Compile Include="Exceptions\B2AuthenticationException.cs" />
-    <Compile Include="Exceptions\B2AuthenticationResponse.cs" />
+    <Compile Include="Objects\B2AuthenticationResponse.cs" />
     <Compile Include="Objects\B2BucketObject.cs" />
-    <Compile Include="Objects\B2BucketCache.cs" />
     <Compile Include="Objects\B2BucketList.cs" />
     <Compile Include="Enums\B2BucketType.cs" />
     <Compile Include="B2Communicator.cs" />
-    <Compile Include="Exceptions\B2Error.cs" />
+    <Compile Include="Objects\B2Error.cs" />
     <Compile Include="Exceptions\B2Exception.cs" />
     <Compile Include="Enums\B2FileAction.cs" />
     <Compile Include="Objects\B2FileBase.cs" />
@@ -89,6 +95,7 @@
     <Compile Include="Utilities\KeyLocker.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

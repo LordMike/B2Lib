@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using B2Lib.Client;
 using B2Lib.Enums;
 using B2Lib.Exceptions;
-using B2Lib.Objects;
 using B2Lib.SyncExtensions;
 using B2Lib.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -42,9 +41,9 @@ namespace B2Lib.Tests
         [ClassCleanup]
         public static void TestCleanup()
         {
-            List<B2File> files = _bucket.GetFileVersions().ToList();
+            List<B2FileItemBase> files = _bucket.GetFileVersions().ToList();
 
-            foreach (B2File file in files)
+            foreach (B2FileItemBase file in files)
                 file.Delete();
 
             _bucket.Delete();
@@ -57,6 +56,24 @@ namespace B2Lib.Tests
             catch (Exception)
             {
             }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(B2Exception))]
+        public void GetMissingFile()
+        {
+            B2File res = _bucket.GetFile("4_z4b156694d986f47c54320610_f200866faa871bf5f_d20160408_m223411_c001_v0001022_t0052");
+
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(B2Exception))]
+        public void GetMissingLargeFile()
+        {
+            B2LargeFile res = _bucket.GetLargeFile("4_z4b156694d986f47c54320610_f200866faa871bf5f_d20160408_m223411_c001_v0001022_t0052");
+
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -91,7 +108,7 @@ namespace B2Lib.Tests
 
             // Enumerate it
             List<B2File> list = listFiles.ToList();
-            List<B2File> listVersions = listFileVersions.ToList();
+            List<B2FileItemBase> listVersions = listFileVersions.ToList();
 
             foreach (B2File expected in files)
             {
@@ -120,15 +137,16 @@ namespace B2Lib.Tests
             TestFileContents(file2);
 
             // Enumerate it
-            List<B2File> list = _bucket.GetFileVersions().ToList();
-            List<B2File> listFiles = list.Where(s => s.FileName == "test").ToList();
+            List<B2FileItemBase> list = _bucket.GetFileVersions().ToList();
+            List<B2FileItemBase> listFiles = list.Where(s => s.FileName == "test").ToList();
 
             Assert.AreEqual(2, listFiles.Count);
             Assert.IsTrue(listFiles.Any(s => s.FileId == file1.FileId));
             Assert.IsTrue(listFiles.Any(s => s.FileId == file2.FileId));
 
-            foreach (B2File listFile in listFiles)
+            foreach (B2FileItemBase b2FileItemBase in listFiles)
             {
+                B2File listFile = (B2File)b2FileItemBase;
                 TestFileContents(listFile, B2FileAction.Upload);
             }
 
@@ -174,39 +192,38 @@ namespace B2Lib.Tests
             File.WriteAllText(_tmpPath, "Testworld,123");
 
             // Upload it 
-            B2File file = _bucket.CreateFile("test").UploadFileData(new FileInfo(_tmpPath));
-            TestFileContents(file);
+            B2File originalFile = _bucket.CreateFile("test").UploadFileData(new FileInfo(_tmpPath));
+            TestFileContents(originalFile);
 
             // Enumerate it
             List<B2File> list = _bucket.GetFiles().ToList();
-            B2File listFile = list.FirstOrDefault(s => s.FileId == file.FileId);
+            B2File listFile = list.FirstOrDefault(s => s.FileId == originalFile.FileId);
 
             TestFileContents(listFile, B2FileAction.Upload);
 
             // Hide it
-            _bucket.HideFile(listFile.FileName);
-            B2File hideFileItem = _bucket.GetFiles().FirstOrDefault(s => s.FileName.Equals(listFile.FileName));
+            _bucket.HideFile(originalFile.FileName);
 
             // Enumerate it (it should now be hidden)
             list = _bucket.GetFiles().ToList();
-            listFile = list.FirstOrDefault(s => s.FileId == file.FileId);
+            listFile = list.FirstOrDefault(s => s.FileId == originalFile.FileId);
 
             Assert.IsNull(listFile);
 
             // Enumerate versions (it should be visible)
-            list = _bucket.GetFileVersions().ToList();
-            B2File hideFile = list.FirstOrDefault(s => s.FileId == hideFileItem.FileId);
-            listFile = list.FirstOrDefault(s => s.FileId == file.FileId);
+            List<B2FileItemBase> versions = _bucket.GetFileVersions().ToList();
+            B2File hideFile = versions.OfType<B2File>().FirstOrDefault(s => s.FileName == originalFile.FileName && s.Action == B2FileAction.Hide);
+            listFile = versions.OfType<B2File>().FirstOrDefault(s => s.FileId == originalFile.FileId);
 
             TestFileContents(hideFile, B2FileAction.Hide);
             TestFileContents(listFile, B2FileAction.Upload);
 
             // Delete file
-            file.Delete();
+            originalFile.Delete();
 
             // Ensure list is blank
-            list = _bucket.GetFiles().ToList();
-            Assert.IsFalse(list.Any(s => s.FileId == file.FileId));
+            List<B2FileItemBase> blankFilesList = _bucket.GetFileVersions().ToList();
+            Assert.IsFalse(blankFilesList.Any(s => s.FileId == originalFile.FileId));
         }
 
         [TestMethod]
@@ -241,7 +258,7 @@ namespace B2Lib.Tests
             }
         }
 
-        private void TestFileContents(B2File file)
+        private void TestFileContents(B2FileItemBase file)
         {
             Assert.IsNotNull(file);
             Assert.IsFalse(string.IsNullOrWhiteSpace(file.FileId));
@@ -249,6 +266,13 @@ namespace B2Lib.Tests
             Assert.IsFalse(string.IsNullOrWhiteSpace(file.BucketId));
             Assert.IsFalse(string.IsNullOrWhiteSpace(file.AccountId));
             Assert.IsTrue(file.UploadTimestamp > DateTime.MinValue);
+
+            Assert.IsNotNull(file.FileInfo);
+        }
+
+        private void TestFileContents(B2File file, B2FileAction expectedAction)
+        {
+            TestFileContents(file);
             Assert.IsTrue(Enum.IsDefined(typeof(B2FileAction), file.Action));
 
             if (file.Action == B2FileAction.Hide)
@@ -257,19 +281,16 @@ namespace B2Lib.Tests
                 Assert.IsTrue(string.IsNullOrWhiteSpace(file.ContentSha1));
                 Assert.IsTrue(string.IsNullOrWhiteSpace(file.ContentType));
             }
-            else
+            else if (file.Action == B2FileAction.Upload)
             {
                 Assert.IsTrue(file.ContentLength > 0);
                 Assert.IsFalse(string.IsNullOrWhiteSpace(file.ContentSha1));
                 Assert.IsFalse(string.IsNullOrWhiteSpace(file.ContentType));
             }
-
-            Assert.IsNotNull(file.FileInfo);
-        }
-
-        private void TestFileContents(B2File file, B2FileAction expectedAction)
-        {
-            TestFileContents(file);
+            else
+            {
+                Assert.Fail();
+            }
 
             Assert.AreEqual(expectedAction, file.Action);
             if (file.Action == B2FileAction.Upload)

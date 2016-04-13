@@ -237,7 +237,7 @@ namespace B2Lib
                 throw new ArgumentException("Filename must be set");
 
             if (string.IsNullOrEmpty(contentType))
-                throw new ArgumentException("ContentType must be set");
+                contentType = B2Constants.AutoContenType;
 
             // Prepare
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, uploadUri);
@@ -303,7 +303,7 @@ namespace B2Lib
             msg.Headers.Add("X-Bz-Content-Sha1", sha1);
 
             msg.Content = new StreamContent(stream);
-            msg.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType ?? "b2/x-auto");
+            msg.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType ?? B2Constants.AutoContenType);
 
             HttpResponseMessage resp = await GetHttpClient(true).SendAsync(msg).ConfigureAwait(false);
 
@@ -401,7 +401,7 @@ namespace B2Lib
         /// 
         /// https://www.backblaze.com/b2/docs/b2_start_large_file.html
         /// </summary>
-        public async Task<B2FileInfo> StartLargeFileUpload(string bucketId, string fileName, string contentType, Dictionary<string, string> fileInfo)
+        public async Task<B2UnfinishedLargeFile> StartLargeFileUpload(string bucketId, string fileName, string contentType, Dictionary<string, string> fileInfo)
         {
             // Pre-checks
             if (string.IsNullOrEmpty(bucketId))
@@ -411,7 +411,7 @@ namespace B2Lib
                 throw new ArgumentException("Filename must be set");
 
             if (string.IsNullOrEmpty(contentType))
-                throw new ArgumentException("ContentType must be set");
+                contentType = B2Constants.AutoContenType;
 
             // Prepare
             HttpResponseMessage resp = await InternalRequest(ApiUri, "/b2api/v1/b2_start_large_file", new
@@ -422,9 +422,7 @@ namespace B2Lib
                 fileInfo
             });
 
-            B2FileInfo file = JsonConvert.DeserializeObject<B2FileInfo>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
-
-            file.Action = B2FileAction.Start;
+            B2UnfinishedLargeFile file = JsonConvert.DeserializeObject<B2UnfinishedLargeFile>(await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
 
             return file;
         }

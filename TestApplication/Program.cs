@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using B2Lib;
+using B2Lib.Client;
 using B2Lib.Enums;
-using B2Lib.Objects;
 using B2Lib.SyncExtensions;
 
 namespace TestApplication
@@ -35,28 +34,22 @@ namespace TestApplication
                 bck = client.CreateBucket(name, B2BucketType.AllPrivate);
             }
 
+            client.SaveState("state");
+
             string path = Path.GetTempFileName();
             File.WriteAllText(path, "Testworld".PadRight(2000, 'A'));
 
-            var res = client.UploadFile(bck, new FileInfo(path), "Testfile.txt");
+            //var res = bck.CreateFile("Testfile.txt");
+            //res.UploadFileData(new FileInfo(path));
 
-            return;
+            List<B2FileItemBase> files = bck.GetFileVersions().ToList();
+            Task.WaitAll(files.Select(s => s.DeleteAsync()).ToArray());
+            
+            B2LargeFile largeFile = bck.CreateLargeFile("large-file.txt");
 
-            List<B2FileInfo> files = client.ListFileVersions(bck).ToList();
-            Console.WriteLine(files.Count);
-
-            Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 30 }, file =>
-            {
-                client.DeleteFile(file);
-            });
-
-            //client.UploadFile(bck, new FileInfo("state"), "state", new Dictionary<string, string> { { "test", "\"" } }).Wait();
-
-            files = client.ListFileVersions(bck).ToList();
-            Console.WriteLine(files.Count);
-
-
-            client.SaveState("state");
+            List<B2File> files1 = bck.GetFiles().ToList();
+            List<B2FileItemBase> files2 = bck.GetFileVersions().ToList();
+            List<B2LargeFile> files3 = bck.GetUnfinishedLargeFiles().ToList();
 
             Console.WriteLine();
         }

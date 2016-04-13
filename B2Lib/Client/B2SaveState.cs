@@ -14,7 +14,7 @@ namespace B2Lib.Client
         public Uri ApiUrl { get; set; }
         public Uri DownloadUrl { get; set; }
 
-        public List<B2BucketCache> BucketCache { get; set; }
+        public List<B2BucketObject> BucketCache { get; set; }
 
         public void CopyTo(B2SaveState other)
         {
