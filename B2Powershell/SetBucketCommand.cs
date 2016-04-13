@@ -1,6 +1,6 @@
 using System.Management.Automation;
+using B2Lib.Client;
 using B2Lib.Enums;
-using B2Lib.Objects;
 using B2Lib.SyncExtensions;
 
 namespace B2Powershell
@@ -16,7 +16,7 @@ namespace B2Powershell
 
         [Parameter(ParameterSetName = "by_bucket", ValueFromPipeline = true, Mandatory = true, Position = 0)]
         public B2Bucket[] Buckets { get; set; }
-        
+
         protected override void ProcessRecordInternal()
         {
             if (ParameterSetName == "by_name")
@@ -24,18 +24,20 @@ namespace B2Powershell
                 foreach (string bucketName in BucketNames)
                 {
                     B2Bucket bucket = Client.GetBucketByName(bucketName);
-                    B2Bucket res = Client.UpdateBucket(bucket, NewType);
+                    bool res = bucket.Update(NewType);
 
-                    WriteObject(res);
+                    if (res)
+                        WriteObject(bucket);
                 }
             }
             else if (ParameterSetName == "by_bucket")
             {
                 foreach (B2Bucket bucket in Buckets)
                 {
-                    B2Bucket res = Client.UpdateBucket(bucket, NewType);
+                    bool res = bucket.Update(NewType);
 
-                    WriteObject(res);
+                    if (res)
+                        WriteObject(bucket);
                 }
             }
             else

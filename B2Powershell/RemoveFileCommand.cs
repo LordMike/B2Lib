@@ -1,5 +1,5 @@
 using System.Management.Automation;
-using B2Lib.Objects;
+using B2Lib.Client;
 using B2Lib.SyncExtensions;
 
 namespace B2Powershell
@@ -8,13 +8,13 @@ namespace B2Powershell
     public class RemoveFileCommand : B2CommandWithSaveState
     {
         [Parameter(Mandatory = true, ValueFromPipeline = true, Position = 0)]
-        public B2FileBase[] Files { get; set; }
+        public B2File[] Files { get; set; }
 
         protected override void ProcessRecordInternal()
         {
-            foreach (B2FileBase file in Files)
+            foreach (B2File file in Files)
             {
-                bool result = Client.DeleteFile(file);
+                bool result = file.Delete();
                 WriteObject(result);
             }
         }

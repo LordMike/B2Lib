@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
-using B2Lib.Objects;
+using B2Lib.Client;
 using B2Lib.SyncExtensions;
 using B2Lib.Utilities;
 
@@ -35,8 +35,8 @@ namespace B2Powershell
                     throw new PSArgumentException("Invalid set of values provided");
             }
 
-            B2FilesIterator files = Client.ListFiles(bucket);
-            IEnumerable<B2FileBase> iterator = files;
+            B2FilesIterator files = bucket.GetFiles();
+            IEnumerable<B2File> iterator = files;
 
             if (Count.HasValue)
             {

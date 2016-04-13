@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Management.Automation;
-using System.Threading;
-using System.Threading.Tasks;
-using B2Lib.Objects;
+using B2Lib.Client;
 using B2Lib.SyncExtensions;
 
 namespace B2Powershell
@@ -49,49 +47,18 @@ namespace B2Powershell
             }
 
             WriteVerbose($"Uploading {todo.Count:N0} files");
-
-            ProgressRecord progressRecord = new ProgressRecord(1, "placeholder", "placeholder");
-
+            
             for (int i = 0; i < todo.Count; i++)
             {
                 UploadSpec spec = todo[i];
 
-                WriteVerbose($"Uploading {spec.LocalFile.Name} to {""}");
-
-                progressRecord.Activity = $"Uploading {todo.Count - i} files";
-                progressRecord.StatusDescription = spec.LocalFile.Name;
-
-                progressRecord.PercentComplete = 0;
-                WriteProgress(progressRecord);
-
+                WriteVerbose($"Uploading {spec.LocalFile.Name} to {Bucket.BucketName}");
+                
                 // Upload file
-                using (FileStream fs = spec.LocalFile.OpenRead())
-                {
-                    B2Uploader uploader = Client.GetUploader(Bucket);
+                B2File newFile = Bucket.CreateFile(spec.LocalFile.Name);
+                newFile.UploadFileData(spec.LocalFile);
 
-                    uploader.SetInput(fs);
-                    uploader.CalculateSha1FromInput();
-                    uploader.SetFileName(spec.LocalFile.Name);
-
-                    uploader.SetNotificationAction((position, length) =>
-                    {
-                        if (length == 0)
-                            // Hack to avoid DivideByZero
-                            length = 1;
-
-                        progressRecord.PercentComplete = (int)(position * 100f / length);
-                    });
-
-                    Task<B2FileInfo> res = Client.UploadFileAsync(uploader);
-                    Task[] tasks = { res };
-
-                    while (!Task.WaitAll(tasks, 100))
-                    {
-                        WriteProgress(progressRecord);
-                    }
-
-                    WriteObject(res.Result);
-                }
+                WriteObject(newFile);
             }
         }
 

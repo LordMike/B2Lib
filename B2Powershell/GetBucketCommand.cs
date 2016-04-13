@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
-using B2Lib.Objects;
+using B2Lib.Client;
 using B2Lib.SyncExtensions;
 
 namespace B2Powershell
@@ -18,7 +18,7 @@ namespace B2Powershell
 
         protected override void ProcessRecordInternal()
         {
-            IEnumerable<B2Bucket> toShow = Client.ListBuckets();
+            IEnumerable<B2Bucket> toShow = Client.GetBuckets();
             if (!string.IsNullOrEmpty(Name))
             {
                 toShow = toShow.Where(s => s.BucketName.Equals(Name.Trim(), StringComparison.InvariantCultureIgnoreCase));

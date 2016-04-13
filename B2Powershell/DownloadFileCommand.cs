@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Management.Automation;
-using B2Lib.Objects;
+using B2Lib.Client;
 using B2Lib.SyncExtensions;
 
 namespace B2Powershell
@@ -10,13 +10,13 @@ namespace B2Powershell
     public class DownloadFileCommand : B2CommandWithSaveState
     {
         [Parameter(ParameterSetName = "multiple", Mandatory = true, ValueFromPipeline = true, Position = 0)]
-        public B2FileBase[] Files { get; set; }
+        public B2File[] Files { get; set; }
 
         [Parameter(ParameterSetName = "multiple")]
         public string TargetDirectory { get; set; }
 
         [Parameter(ParameterSetName = "single", Mandatory = true, ValueFromPipeline = true, Position = 0)]
-        public B2FileBase File { get; set; }
+        public B2File File { get; set; }
 
         [Parameter(ParameterSetName = "single")]
         public string TargetFile { get; set; }
@@ -37,7 +37,7 @@ namespace B2Powershell
             {
                 string targetDir = Path.GetFullPath(TargetDirectory ?? ".");
 
-                foreach (B2FileBase file in Files)
+                foreach (B2File file in Files)
                 {
                     DownloadSpec tmp = new DownloadSpec();
 
@@ -50,19 +50,11 @@ namespace B2Powershell
 
             WriteVerbose($"Downloading {todo.Count:N0} files");
 
-            ProgressRecord progressRecord = new ProgressRecord(1, "placeholder", "placeholder");
-
             for (int i = 0; i < todo.Count; i++)
             {
                 DownloadSpec spec = todo[i];
 
                 WriteVerbose($"Downloading {spec.File.FileName} to {spec.LocalFile}");
-
-                progressRecord.Activity = $"Downloading {todo.Count - i} files";
-                progressRecord.StatusDescription = spec.File.FileName;
-
-                progressRecord.PercentComplete = 0;
-                WriteProgress(progressRecord);
 
                 // Download file
                 string dirPath = Path.GetDirectoryName(spec.LocalFile);
@@ -70,24 +62,16 @@ namespace B2Powershell
                     Directory.CreateDirectory(dirPath);
 
                 using (FileStream fs = System.IO.File.OpenWrite(spec.LocalFile))
-                using (B2DownloadResult res = Client.DownloadFileContent(spec.File))
+                using (Stream res = spec.File.DownloadData())
                 {
-                    int read;
-                    byte[] buffer = new byte[4096];
-                    while ((read = res.Stream.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        fs.Write(buffer, 0, read);
-
-                        progressRecord.PercentComplete = (int)(fs.Position * 100f / res.Info.ContentLength);
-                        WriteProgress(progressRecord);
-                    }
+                    res.CopyTo(fs);
                 }
             }
         }
 
         class DownloadSpec
         {
-            public B2FileBase File { get; set; }
+            public B2File File { get; set; }
 
             public string LocalFile { get; set; }
         }

@@ -1,6 +1,5 @@
 ﻿using System.Management.Automation;
-using B2Lib;
-using B2Lib.Objects;
+using B2Lib.Client;
 using B2Lib.SyncExtensions;
 
 namespace B2Powershell

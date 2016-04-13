@@ -1,5 +1,5 @@
 using System.Management.Automation;
-using B2Lib.Objects;
+using B2Lib.Client;
 
 namespace B2Powershell
 {
