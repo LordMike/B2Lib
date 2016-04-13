@@ -15,16 +15,11 @@ namespace B2Lib.SyncExtensions
             return Utility.AsyncRunHelper(() => file.UploadFileDataAsync(source));
         }
         
-        public static Stream DownloadData(this B2File file)
+        public static Stream DownloadData(this B2File file, B2Communicator.NotifyProgress progressHandler = null)
         {
-            return Utility.AsyncRunHelper(() => file.DownloadDataAsync());
+            return Utility.AsyncRunHelper(() => file.DownloadDataAsync(progressHandler));
         }
-
-        public static Stream DownloadData(this B2File file, long rangeStart, long rangeEnd)
-        {
-            return Utility.AsyncRunHelper(() => file.DownloadDataAsync(rangeStart, rangeEnd));
-        }
-
+        
         public static B2File Refresh(this B2File file)
         {
             return Utility.AsyncRunHelper(() => file.RefreshAsync());

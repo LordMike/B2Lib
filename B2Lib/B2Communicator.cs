@@ -318,14 +318,27 @@ namespace B2Lib
         /// 
         /// https://www.backblaze.com/b2/docs/b2_download_file_by_id.html
         /// </summary>
-        public async Task<B2DownloadResult> DownloadFileContent(string fileId, string overrideAuthToken = null)
+        public async Task<B2DownloadResult> DownloadFileContent(string fileId, string overrideAuthToken = null, NotifyProgress notifyProgress = null)
         {
             HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Get, new Uri(DownloadUri, "/b2api/v1/b2_download_file_by_id?fileId=" + fileId));
 
             if (!string.IsNullOrEmpty(overrideAuthToken) || !string.IsNullOrEmpty(AuthToken))
                 msg.Headers.Authorization = new AuthenticationHeaderValue(overrideAuthToken ?? AuthToken);
 
-            HttpResponseMessage resp = GetHttpClient(true).SendAsync(msg, HttpCompletionOption.ResponseHeadersRead).Result;
+            ProgressMessageHandler progressMessageHandler = new ProgressMessageHandler(new HttpClientHandler());
+
+            EventHandler<HttpProgressEventArgs> progress = null;
+            if (notifyProgress != null)
+            {
+                progress = (sender, args) =>
+                {
+                    notifyProgress(args.TotalBytes ?? 0, args.TotalBytes ?? 0);
+                };
+
+                progressMessageHandler.HttpSendProgress += progress;
+            }
+
+            HttpResponseMessage resp = GetHttpClient(true, progressMessageHandler).SendAsync(msg, HttpCompletionOption.ResponseHeadersRead).Result;
 
             if (resp.StatusCode != HttpStatusCode.OK)
                 HandleErrorResponse(resp).Wait();

@@ -14,6 +14,8 @@ namespace B2Lib.Client
         private readonly B2Client _b2Client;
         private B2FileInfo _file;
 
+        private B2Communicator.NotifyProgress _uploadNotifyDelegate;
+
         public B2FileState State { get; private set; }
 
         public override string FileId => _file.FileId;
@@ -85,6 +87,13 @@ namespace B2Lib.Client
             return this;
         }
 
+        public B2File SetUploadProgressHandler(B2Communicator.NotifyProgress handler)
+        {
+            _uploadNotifyDelegate = handler;
+
+            return this;
+        }
+
         public async Task<B2File> UploadFileDataAsync(FileInfo file)
         {
             ThrowIfNot(B2FileState.New);
@@ -100,7 +109,7 @@ namespace B2Lib.Client
 
                     fs.Seek(0, SeekOrigin.Begin);
 
-                    B2FileInfo result = await _b2Client.Communicator.UploadFile(config.UploadUrl, config.AuthorizationToken, fs, sha1Hash, FileName, ContentType, FileInfo, null);
+                    B2FileInfo result = await _b2Client.Communicator.UploadFile(config.UploadUrl, config.AuthorizationToken, fs, sha1Hash, FileName, ContentType, FileInfo, _uploadNotifyDelegate);
 
                     if (result.ContentSha1 != sha1Hash)
                         throw new ArgumentException("Bad transfer - hash mismatch");
@@ -124,7 +133,7 @@ namespace B2Lib.Client
             B2UploadConfiguration config = _b2Client.FetchUploadConfig(BucketId);
             try
             {
-                B2FileInfo result = await _b2Client.Communicator.UploadFile(config.UploadUrl, config.AuthorizationToken, source, ContentSha1, FileName, ContentType, FileInfo, null);
+                B2FileInfo result = await _b2Client.Communicator.UploadFile(config.UploadUrl, config.AuthorizationToken, source, ContentSha1, FileName, ContentType, FileInfo, _uploadNotifyDelegate);
 
                 if (result.ContentSha1 != ContentSha1)
                     throw new ArgumentException("Bad transfer - hash mismatch");
@@ -140,31 +149,18 @@ namespace B2Lib.Client
             return this;
         }
 
-        public async Task<Stream> DownloadDataAsync()
+        public async Task<Stream> DownloadDataAsync(B2Communicator.NotifyProgress progressHandler = null)
         {
             ThrowIfNot(B2FileState.Present);
 
             if (Action != B2FileAction.Upload)
                 throw new InvalidOperationException("This file is not a file - it's most likely a 'hide' placeholder");
 
-            B2DownloadResult res = await _b2Client.Communicator.DownloadFileContent(FileId);
+            B2DownloadResult res = await _b2Client.Communicator.DownloadFileContent(FileId, notifyProgress: progressHandler);
 
             return res.Stream;
         }
-
-        public async Task<Stream> DownloadDataAsync(long rangeStart, long rangeEnd)
-        {
-            throw new NotImplementedException();
-            //ThrowIfNot(B2FileState.Present);
-
-            //if (Action != B2FileAction.Upload)
-            //    throw new InvalidOperationException("This file is not a file - it's most likely a 'hide' placeholder");
-
-            //B2DownloadResult res = await _b2Client.Communicator.DownloadFileContent(_b2Client.DownloadUrl, FileId);
-
-            //return res.Stream;
-        }
-
+        
         public async Task<B2File> RefreshAsync()
         {
             B2FileInfo info = await _b2Client.Communicator.GetFileInfo(FileId);
