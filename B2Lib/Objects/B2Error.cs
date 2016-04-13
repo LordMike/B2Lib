@@ -1,4 +1,4 @@
-namespace B2Lib.Exceptions
+namespace B2Lib.Objects
 {
     internal class B2Error
     {

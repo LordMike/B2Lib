@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace B2Lib.Exceptions
+namespace B2Lib.Objects
 {
     public class B2AuthenticationResponse
     {

@@ -88,7 +88,7 @@
     <Compile Include="Objects\B2FileListContainer.cs" />
     <Compile Include="Objects\B2FileInfo.cs" />
     <Compile Include="Exceptions\B2MissingAuthenticationException.cs" />
-    <Compile Include="Client\B2SaveState.cs" />
+    <Compile Include="Objects\B2SaveState.cs" />
     <Compile Include="Objects\B2UploadConfiguration.cs" />
     <Compile Include="Utilities\EnumExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
