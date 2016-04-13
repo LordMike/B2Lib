@@ -74,7 +74,6 @@
     <Compile Include="Utilities\B2UnfinishedLargeFilesIterator.cs" />
     <Compile Include="Utilities\UnixDateTimeConverter.cs" />
     <Compile Include="Utilities\B2BucketCacher.cs" />
-    <Compile Include="Exceptions\B2AuthenticationException.cs" />
     <Compile Include="Objects\B2AuthenticationResponse.cs" />
     <Compile Include="Objects\B2BucketObject.cs" />
     <Compile Include="Objects\B2BucketList.cs" />
@@ -92,7 +91,6 @@
     <Compile Include="Objects\B2UploadConfiguration.cs" />
     <Compile Include="Utilities\EnumExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\KeyLocker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
